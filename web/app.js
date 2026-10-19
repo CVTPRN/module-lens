@@ -205,7 +205,7 @@ $('module-select').addEventListener('change',()=>void chooseModule($('module-sel
 $('from-select').addEventListener('change',()=>void versionChanged());$('to-select').addEventListener('change',()=>void versionChanged());
 $('scope-select').addEventListener('change',invalidateReport);
 $('compare-button').addEventListener('click',()=>void runComparison());
-for(const engine of ['terraform','opentofu'])$(`engine-${engine}`).addEventListener('click',()=>{if(state.engine===engine)return;state.engine=engine;updateEngine();if(state.module)void chooseModule(state.module.id,$('from-select').value,$('to-select').value,$('scope-select').value);});
+for(const engine of ['terraform','opentofu'])$(`engine-${engine}`).addEventListener('click',()=>{if(engine==='terraform'){location.assign('./');return;}if(state.engine===engine)return;state.engine=engine;updateEngine();if(state.module)void chooseModule(state.module.id,$('from-select').value,$('to-select').value,$('scope-select').value);});
 function updateEngine() {for(const engine of ['terraform','opentofu']){$(`engine-${engine}`).classList.toggle('selected',state.engine===engine);$(`engine-${engine}`).setAttribute('aria-pressed',String(state.engine===engine));}}
 for(const id of ['finding-search','level-filter','category-filter'])$(id).addEventListener(id==='finding-search'?'input':'change',renderFindings);
 for(const name of ['changes','docs'])$(`tab-${name}`).addEventListener('click',()=>selectTab(name));
@@ -223,7 +223,7 @@ async function boot() {
     if(catalog.schema_version!==1||!Array.isArray(catalog.modules)||!catalog.modules.length)throw new Error('A modulkatalógus üres vagy nem támogatott formátumú.');
     state.catalog=catalog;fillCatalog();
     $('catalog-state').textContent=`${catalog.modules.length} modul · ${dateLabel(catalog.generated_at)}`;
-    state.engine=params.get('engine')==='opentofu'?'opentofu':'terraform';updateEngine();
+    state.engine='opentofu';updateEngine();
     const id=params.get('module')||catalog.modules[0].id;
     await chooseModule(id,params.get('from'),params.get('to'),params.get('scope')||'.');
     if(catalog.errors?.length)message('A katalógus frissítése nem minden modulnál sikerült. Az érintett modulok korábbi adatai szerepelhetnek.');

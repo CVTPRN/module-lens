@@ -1,38 +1,27 @@
 # Ellenőrzési eredmény — 2026-10-19
 
-- Python: 14 sikeres teszt. HCL/JSON parser, `.tofu` elsőbbség, almodulok,
-  hibajelzés, immutable források, archívumútvonalak és symlinkek kezelése.
-- JavaScript és DOM: 25 sikeres teszt. Verziórendezés, feltételes teendők,
-  dokumentált átnevezés, alapértékek, függőségek, state-deklarációk,
-  nem modellezett forrásváltozások, dokumentumszűrés, exportformátum,
-  valódi EKS 20 → 21 migráció és a teljes felhasználói folyamat.
-- Statikus build: 102 tömörített snapshot referenciája, forráscommitja,
-  motorválasztása és upstream licencszövege ellenőrizve.
-- Előre indexelt adatok: 5 modul, összesen 51 stabil verzió, motoronként külön
-  pillanatképpel. A katalógus gyűjtése sikeres; hiányzó anchor vagy meghiúsult
-  verzió nincs.
-- A publikus weboldal nem használ GitHub- vagy AI-tokent. Az adatokat saját
-  statikus útvonalairól olvassa; ezt a DOM-teszt is ellenőrzi.
+- Python: 20 sikeres teszt; beleértve a tényleges HTTP-kiszolgálást és a Registry-útvonalak védelmét.
+- JavaScript/DOM/Node: 46 sikeres teszt; a korábbi HCL-elemző mellett a teljes Registry-folyamat, lapozás, providerfilter, teljes verziólista, SemVer, hibakezelés, elavult válaszok, a standalone Node HTTP-kiszolgáló és a statikus tárhelyre figyelmeztető nézet.
+- Az eredeti ötmodulos listától független, valódi Registry-adatokat használtunk a `terraform-aws-modules/ec2-instance/aws` 5.0.0 és 6.0.0 verzióihoz. A tesztfixture-ök a Registryből származnak.
+- A teljes Registry-listázás élő lekérése 24 találatot és következő lapozási offsetet adott. Az Azure virtualnetwork keresés valós Azure-modulokat adott vissza.
+- A verziókezelés 1200 elemű listával is tesztelt; nincs a korábbi indexelt listára korlátozva.
+- A statikus build a meglévő 102 OpenTofu/Terraform-pillanatkép integritását is ellenőrzi.
+- A privát szerveres webes változat natív publikálása sikeres.
+- A hosztolt változaton a kezdőlap, az API-állapot, az Azure-modulkeresés, az EC2-modul teljes verziólistája és a 6.0.0-s verzió metaadatai is HTTP 200 választ adtak. Az EC2-verziólista 99 kiadást tartalmazott.
 
-## Ismert ellenőrzési korlátok
+## Korlátok
 
-- Vizuális böngészőellenőrzés nem volt elérhető. A DOM-teszt a működést
-  ellenőrzi, nem igazolja a pixeles megjelenést vagy minden eszköz elrendezését.
-- A Google Network v18.2.0, v18.3.0 és v18.3.1 kiadásának
-  `modules/foundation/network` almoduljában két HCL-fájlt a rögzített parser
-  nem tud feldolgozni. Ezeket a megfelelő almodul riportja hiányos elemzésként
-  jelzi; nem ad kompatibilitási garanciát. A főmodul ettől külön vizsgálható.
-- Terraform/OpenTofu CLI-kódot, infrastruktúrát vagy felhasználói state-et nem
-  futtattunk és nem vizsgáltunk. A parser- és deklarációelemzés nem helyettesít
-  egy konkrét projektben végzett validálást és plan ellenőrzést.
-- Célrepository: https://github.com/CVTPRN/module-lens . Az éles GitHub CI és
-  Pages-deploy állapota a repository Actions oldalán ellenőrizhető.
+- Vizuális böngészőellenőrzés nem volt elérhető. A DOM-tesztek a működést ellenőrzik, a megjelenést nem tanúsítják.
+- A teljes Registry-keresés szerveroldali API-t igényel. A GitHub Pages nézet külön jelzi az API hiányát és a működő hosztolt alkalmazáshoz vezet.
+- A Terraform Registry-nézet közzétett metaadatokat hasonlít össze; nem vizsgálja a felhasználó kódját, state-jét, outputkifejezéseit vagy az átugrott kiadások teljes migrációs történetét.
+- A korábbi OpenTofu-nézetben a Google Network v18.2.0, v18.3.0 és v18.3.1 `modules/foundation/network` almoduljának két fájlját a rögzített HCL-parser nem tudja teljesen feldolgozni; ezt a riport hiányos elemzésként jelzi.
 
 Újrafuttatás:
 
 ```bash
-python -m unittest discover -s tests -p 'test_*.py' -v
+python -m pip install -r requirements.txt
 npm ci
+python -m unittest discover -s tests -p 'test_*.py' -v
 npm test
 python scripts/build.py
 ```

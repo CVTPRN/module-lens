@@ -6,8 +6,8 @@ import {JSDOM} from 'jsdom';
 
 test('complete page flow: boot, real report, filtering, docs, engine, catalog, invalid range and sharing',async()=>{
   const root=new URL('../web/',import.meta.url);
-  const html=await readFile(new URL('index.html',root),'utf8');
-  const dom=new JSDOM(html,{url:'https://example.github.io/module-lens/',pretendToBeVisual:true});
+  const html=await readFile(new URL('opentofu.html',root),'utf8');
+  const dom=new JSDOM(html,{url:'https://example.github.io/module-lens/opentofu.html?engine=opentofu',pretendToBeVisual:true});
   const {window}=dom;
   for(const name of ['window','document','location','history','localStorage'])globalThis[name]=name==='window'?window:window[name];
   Object.defineProperty(globalThis,'navigator',{configurable:true,value:window.navigator});

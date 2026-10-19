@@ -1,200 +1,135 @@
 # ModuleLens
 
-**Terraform- és OpenTofu-modulok frissítési különbségei, forrásokkal és feltételes teendőkkel.**
+Terraform-modulok keresése a **teljes nyilvános Terraform Registryben**, minden publikált verzió lekérésével és két verzió összehasonlításával.
 
-Válaszd ki a modult, az almodult, a jelenlegi és a célverziót. Az alkalmazás
-megmutatja a deklarációk közötti eltéréseket, az érintettség feltételét és a
-szükséges ellenőrzést vagy módosítást. Nem szükséges saját kódot vagy state-et
-feltölteni, és a weboldal nem kér GitHub- vagy AI-tokent.
+Az új kereső a felhasználó által megadott `app.py`, `app.js`, `index.html` és `styles.css` prototípusra épül. A korábbi OpenTofu-elemző külön nézetben megmaradt.
 
-## Funkciók
+[Működő webes változat (privát hozzáférés)](https://module-lens-registry.azurebeech10.chatgpt.site)
 
-- Terraform / OpenTofu motorválasztó, tényleges `.tofu` fájl-elsőbbséggel.
-- Modul- és almodulválasztás, stabil verziók numerikus rendezése.
-- Bemenetek: hozzáadás, törlés, dokumentált átnevezés, típus, alapérték,
-  validáció, nullable, sensitive és ephemeral beállítás.
-- Outputok, provider- és CLI-követelmények, belső modulhívások változásai.
-- Erőforrás-deklarációk és `moved` / `removed` / `import` blokkok eltérései.
-- Verziótartományra szűrt changelog és elérhető migrációs dokumentumok.
-- Keresés, súlyosság- és kategóriaszűrés, megosztható URL.
-- Markdown- és JSON-export, böngészős nyomtatás / PDF.
-- Reszponzív magyar felület, világos és sötét megjelenés, billentyűzetes kezelés.
-- Commitazonosítóhoz kötött bizonyíték minden megállapítás mellett.
-- Automatikus adatfrissítés és GitHub Pages-telepítés GitHub Actionsből.
+## Terraform Registry: élő működés
 
-Az első katalógus: **AWS EKS, VPC, S3 Bucket; Google Cloud Network és GKE**.
-Valós upstream adatokkal előre feltöltött katalógust tartalmaz, ezért az első
-induláshoz nem kell megvárni egy adatgyűjtést.
+- Kulcsszavas keresés és pontos `névtér/név/provider` modulcím megadása.
+- Registry-oldal URL-je és `//modules/...` almodulcím is használható.
+- A teljes nyilvános katalógus böngészése és lapozása, előre megadott modullista nélkül.
+- Provider szerinti szűrés; az összes provider választható moduljai elérhetők.
+- Minden közzétett szemverziós verzió lekérése, prerelease-támogatással.
+- Két verzióhoz tartozó almodulok kiválasztása.
+- Új, törölt és módosult inputok/outputok; elérhető provider- és modulfüggőségek; erőforráslisták.
+- Minden eltérés mellett érintettségi feltétel, teendő és Registry-forráshivatkozás.
+- Lehetséges átnevezések külön, bizonytalan javaslatként; a törlést és hozzáadást nem fedik el.
+- JSON/Markdown export és megosztható összehasonlítási URL.
+- Mobilon is használható magyar felület, billentyűzetes keresési találatválasztás.
 
-## GitHub Pages: telepítés
+A „teljes Registry” az élő API keresési tartományát jelenti, nem minden modul helyi másolatát. Egyszerre 24 találat töltődik be; a **További modulok betöltése** folytatja a lapozást. Nincs kézzel karbantartandó Terraform-modul-lista vagy indexeltverzió-korlát.
 
-1. Töltsd a projekt teljes tartalmát egy GitHub-repository `main` ágába.
-   GitHub Free használatához publikus repository javasolt; a privát repós
-   Pages elérhetősége a GitHub-csomagtól függ. A repository publikusra állítása
-   a kódot és az indexelt adatokat is nyilvánossá teszi.
-2. **Settings → Pages → Build and deployment → Source → GitHub Actions.**
-3. **Actions → Refresh catalog and deploy Pages → Run workflow.** Első
-   indításhoz a `refresh_catalog` kikapcsolható, mert a katalógus már a repóban van.
-4. A sikeres deploy után a workflow `github-pages` környezetének URL-je nyitja az oldalt.
+## Indítás helyben
 
-Az útvonalak relatívak: a `https://USER.github.io/REPOSITORY/` forma is működik,
-nem kell gyökérdomain vagy egyedi domain. A frontend buildless ES-modulos
-HTML/CSS/JavaScript, nincs külön Node- vagy Python-szerver éles üzemben.
-
-### Mit futtat a workflow?
-
-```mermaid
-flowchart TD
-  A["GitHub Actions: push / napi futás / kézi indítás"] --> B["Publikus GitHub tagek és archívumok"]
-  B --> C["Python: HCL és JSON feldolgozás"]
-  C --> D["Commitokhoz rögzített, tömörített pillanatképek"]
-  D --> E["Tesztek és katalógusvalidáció"]
-  E --> F["GitHub Pages: statikus weboldal"]
-  F --> G["Böngésző: összehasonlítás és riport"]
-```
-
-A workflow naponta **04:23 UTC** időpontban fut. A gyűjtés csak publikus
-forrásokat olvas. A GitHub által biztosított `GITHUB_TOKEN` kizárólag az Actions
-környezetében kerül felhasználásra, a `api.github.com` API-hívásokhoz; nem
-kerül adatfájlba, frontendbe vagy a letöltött upstream forrásokhoz. Más titok
-vagy fizetős AI API nem szükséges.
-
-A `pages.yml` buildje hibás gyűjtésnél vagy sikertelen tesztnél nem publikál:
-a korábbi működő weboldal marad elérhető. A frissítés nem commitolja vissza az
-adatokat a repóba; a deploy-artifact és az Actions cache tartalmazza az aktuális
-katalógust. A repóba csomagolt adatok frissítéséhez futtasd a gyűjtőt helyben
-és commitold a `web/data` változásait. A cache a snapshotok gyorsítótára;
-eltűnése esetén az adatok újra előállíthatók.
-
-## Helyi futtatás
-
-Szükséges: **Python 3.12+**, **Node.js 22+**, modern böngésző a natív
-`DecompressionStream` API támogatásával.
+A teljes alkalmazáshoz **Python 3.12+** elég; a szerver nem igényel külső Python-csomagot:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-npm ci
-npm run serve
+python app.py --port 8080
 ```
 
-Nyisd meg: **http://localhost:8080/**. Windows PowerShell esetén az aktiválás:
-`.venv\Scripts\Activate.ps1`. A `file://` megnyitás ES-modulok és fetch miatt
-nem támogatott. A kiszolgáló csak helyi fejlesztésre szükséges.
+Nyisd meg: **http://localhost:8080/**.
+
+A szerver ugyanarról az originről szolgálja ki a felületet és az élő Registry API-t. Tokent vagy saját kódot nem kell megadni. A `npm run serve` is ezt a szervert indítja.
+
+### Docker
 
 ```bash
-# Parser-, archívum- és összehasonlítási tesztek
-python -m unittest discover -s tests -p 'test_*.py' -v
-npm test
-
-# Katalógus referenciáinak ellenőrzése és statikus csomagolás
-python scripts/build.py
-
-# Adatok frissítése upstream forrásokból
-python -m collector.collect
-
-# Egyetlen modul frissítése
-python -m collector.collect --only aws-eks
-
-# Minden kiválasztott verzió ismételt feldolgozása
-python -m collector.collect --refresh
+docker compose up --build
 ```
 
-API-token nélkül a GitHub publikus API-korlátja érvényes. Nagyobb gyűjtéshez a
-`GITHUB_TOKEN` környezeti változóban megadott, publikus olvasásra alkalmas token
-használható. Ne írd be a tokent a forráskódba vagy a frontendbe.
+Alapértelmezetten csak a helyi gépen, a **http://localhost:8080/** címen figyel. Saját hosztoláshoz a Dockerfile használható tetszőleges konténerfuttatón; az alkalmazás a konténer 8080-as portján működik.
 
-## Új modul vagy hiányzó verzió hozzáadása
+## GitHub és hosztolás
 
-Példa a `modules.json` egyik elemére:
+A teljes forráskód a https://github.com/CVTPRN/module-lens repóban van.
 
-```json
-{
-  "id": "aws-eks",
-  "name": "EKS",
-  "namespace": "terraform-aws-modules",
-  "registry_name": "eks",
-  "provider": "aws",
-  "repository": "terraform-aws-modules/terraform-aws-eks",
-  "description": "Amazon EKS klaszterek és node groupok",
-  "anchors": ["v20.37.1", "v21.0.0"],
-  "recent": 6
-}
+**GitHub Pages önmagában nem futtatja az élő Registry API-t.** A Registry válaszai jelenleg nem adnak böngészős, más originről használható CORS-engedélyt, ezért a weboldalnak szerveroldali közvetítés kell. A statikus Pages-oldal ezt világosan jelzi, és konfigurált hosztolt alkalmazás esetén annak linkjét mutatja; nem állítja, hogy a keresés API nélkül működik.
+
+Támogatott futtatási módok:
+
+| Mód | Élő teljes Registry | OpenTofu-pillanatképek |
+|---|---|---|
+| `python app.py` | Igen | Igen |
+| Docker | Igen | Igen |
+| Szerveres webes hosztolás | Igen | Igen |
+| GitHub Pages / statikus tárhely | Külön szerveres alkalmazás szükséges | Igen |
+
+A privát hosztolt változat teljes weboldalt és szerveroldali API-t tartalmaz. A hozzáférést a hosztolási platform kezeli; a privát működést a publikus Registry-adatok nem változtatják nyilvánossá. A publikussá tétel külön hozzáférés-beállítás.
+
+Node.js 22+ környezetben csomagtelepítés nélkül is indítható:
+
+```bash
+node server/node-server.js
 ```
 
-- `repository`: publikus, közvetlenül elérhető GitHub-repository.
-- `id`: egyedi fájlrendszerbiztos azonosító; ne változtasd meg meglévő linkeknél.
-- `anchors`: kötelezően indexelendő, a vizsgált tagek között megtalálható verziók.
-- `recent`: a legfrissebb stabil kiadások száma, alapértelmezetten 6.
-- A legutóbbi három megtalált főverzió első és utolsó stabil kiadása is bekerül,
-  amennyiben elérhető a beolvasott taglistában.
+A `PORT` és `HOST` környezeti változókkal konfigurálható.
 
-Ezután futtasd a gyűjtőt, a teszteket és a buildet, majd commitold a módosítást.
-A weboldal látogatói csak az indexelt katalógusból választanak. Az első verzió
-nem biztosít anonim, tetszőleges upstream letöltést vagy privát repós hozzáférést.
+## API
 
-## Az eredmények értelmezése
-
-| Besorolás | Jelentés |
-|---|---|
-| Kötelező teendő | Az adott érintettségi feltétel teljesülésekor módosítás szükséges. |
-| Feltételes módosítás | Például egy törölt bemenet vagy output használata esetén kell módosítás. |
-| Ellenőrizendő | Működés, függőség, belső erőforrás vagy state-kezelés változott. |
-| Új lehetőség | Opcionális bemenet vagy új output; használata külön döntés. |
-| Hiányos elemzés | Parserhiba, ismeretlen blokk vagy nem kiértékelt override szemantika. |
-
-A „nem találtunk kötelező módosítást” állítás kizárólag az elemzett
-deklarációkra vonatkozik. Nem teljes kompatibilitási tanúsítvány.
-
-### Tudatos korlátok
-
-- A HCL-t parser dolgozza fel, de **nem értékelünk ki kifejezéseket**, típusok
-  kompatibilitását, `count` / `for_each` feltételeket vagy provider API-kat.
-- A Terraform/OpenTofu motorválasztás a fájlkiválasztást különbözteti meg.
-  Nem helyettesíti az adott CLI-verzióval végzett `validate` és `plan` ellenőrzést.
-- Egy főmodul lokális almoduljainak változásai a megfelelő almodul külön
-  kiválasztásával vizsgálhatók; a tranzitív függőséggráf nincs kiértékelve.
-- Az erőforrás-deklaráció eltérése **nem bizonyít erőforráscserét**. Ehhez a
-  saját konfiguráció és a state alapján készülő plan szükséges.
-- A típusváltozásokat jelezzük, de nem állítjuk, hogy minden típuseltérés törés.
-- Átnevezést csak explicit dokumentált `old -> new` / `old → new`
-  megfeleltetésből állítunk. Egyébként törlés és hozzáadás marad.
-- A dokumentumok a kiválasztott pillanatképekből származnak. A changelog
-  szemverziós fejlécei alapján a teljes kiválasztott verziótartományra szűrünk.
-  A köztes kiadások teljes szemantikai elemzése és a dokumentáció teljessége
-  nem garantált. Nem verziózható migrációs útmutatók további áttekintést igényelnek.
-- Csak stabil `vMAJOR.MINOR.PATCH` / `MAJOR.MINOR.PATCH` tagek támogatottak.
-  Legfeljebb 400 tag kerül vizsgálatra repositorynként; prerelease és monorepós
-  komponensspecifikus tagek nincsenek támogatva.
-- A token nem jut a frontendbe. A snapshotok és a bennük lévő dokumentáció
-  publikus a Pages-oldalon. Privát vagy bizalmas modul nem kerülhet a katalógusba.
-- Nem futtatunk letöltött kódot, Terraformot, OpenTofut, plan vagy apply parancsot.
-
-## Projektfelépítés
+Mindkét kiszolgáló ugyanazt a korlátozott, csak olvasásra alkalmas API-t biztosítja:
 
 ```text
-collector/              HCL/JSON feldolgozás és publikus upstream adatgyűjtés
-modules.json            Indexelendő modulok és rögzített verziók
-web/index.html          Magyar, hozzáférhető webes felület
-web/style.css           Reszponzív elrendezés és nyomtatási nézet
-web/tokens.css          Világos/sötét színek
-web/app.js              Felhasználói folyamat, szűrés, export, megosztás
-web/lib/compare.js      Önállóan tesztelhető összehasonlítási motor
-web/data/               Előre gyűjtött katalógus és gzip JSON-pillanatképek
-scripts/build.py        Integritásellenőrzés és dist/ előállítás
-tests/                  Parser-, biztonsági és viselkedési tesztek
-.github/workflows/      CI, napi adatfrissítés és Pages-deploy
+GET /api/registry/health
+GET /api/registry/search?q=network&provider=azurerm&offset=0&limit=24
+GET /api/registry/versions?module=terraform-aws-modules/ec2-instance/aws
+GET /api/registry/module?module=terraform-aws-modules/ec2-instance/aws&version=6.0.0
 ```
 
-## Licenc és upstream források
+Üres `q` esetén a Registry teljes katalóguslistájából történik a lapozás. A frontend a kiválasztott két verzió metaadatait hasonlítja össze; nem kell összehasonlítási feladatot indítani GitHub Actionsben.
 
-Az alkalmazáskód MIT-licencű. Az indexelt deklarációk és dokumentumok az
-upstream projektek licencfeltételei alatt maradnak; minden pillanatkép tartalmazza
-a hozzá tartozó eredeti licencszövegeket és forráshivatkozásokat.
-Lásd: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+A Python-szerver (`app.py`) és a hosztolt JavaScript-adapter (`server/registry-proxy.js`) kizárólag a rögzített `registry.terraform.io/v1/modules` originre küld GET kéréseket. Nincs tetszőleges URL-proxy, nincs upstream átirányítás-követés, és a látogatók cookie-ja vagy Authorization fejléce nem kerül a Registryhez. Időkorlát, válaszméret-korlát és korlátozott memóriás gyorsítótár védi a lekéréseket.
 
-- [GitHub Pages egyedi workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-- [OpenTofu fájlkiválasztás](https://opentofu.org/docs/language/files/)
-- [Hivatalos Terraform modulfrissítési útmutató](https://developer.hashicorp.com/validated-patterns/terraform/upgrade-and-refactor-terraform-modules)
-- [python-hcl2](https://github.com/amplify-education/python-hcl2)
+## OpenTofu nézet
+
+A **OpenTofu →** link az `opentofu.html` oldalt nyitja meg. Ez megőrzi az eredeti, forrásból feldolgozott HCL/JSON-pillanatképek összehasonlítását, a `.tofu` fájlok elsőbbségét és a dokumentált migrációs útmutatókat.
+
+Ebben a nézetben továbbra is a `modules.json` szerinti válogatott katalógus és verziók szerepelnek: AWS EKS, VPC, S3; Google Network és GKE. Az élő teljes Registry-keresés a Terraform főoldalon érhető el.
+
+```bash
+# OpenTofu-pillanatképek frissítése
+python -m pip install -r requirements.txt
+python -m collector.collect
+
+# Egy modul frissítése
+python -m collector.collect --only aws-eks
+```
+
+## Tesztelés
+
+```bash
+python -m pip install -r requirements.txt
+npm ci
+python -m unittest discover -s tests -p 'test_*.py' -v
+npm test
+python scripts/build.py
+```
+
+A tesztek között szerepel valódi EC2 Registry-moduladatok összehasonlítása (az eredeti öt modultól függetlenül), 1200 verzió kezelése, szemverziós sorrend, hiányzó Registry-mezők, feltételes teendők, lapozás, providerfilter, elavult aszinkron válaszok, HTTP útvonalvédelem és a meglévő OpenTofu-folyamat.
+
+A DOM-tesztek nem vizuális böngészőtesztek. A részletes ellenőrzési állapotot a `VALIDATION.md` tartalmazza.
+
+## Az eredmények korlátai
+
+A Terraform Registry nézet **a közzétett metaadatokat** hasonlítja össze. Nem értékeli a felhasználó kódját, a kifejezéseket, outputértékeket, validációs blokkokat vagy state-et, és nem vizsgálja a köztes kiadások teljes migrációs történetét. Egy hiányzó Registry-mező nem bizonyít törlést vagy kódváltozást; az ilyen eltérés ellenőrizendőként jelenik meg.
+
+A lehetséges átnevezés hasonló névből és azonos részletes leírásból származó javaslat. Nem bizonyított megfeleltetés, ezért a régi és az új elem önállóan is szerepel.
+
+A tényleges infrastruktúrahatást a saját környezetben készített Terraform/OpenTofu plan alapján kell megítélni. Az „itt nem találtunk eltérést” eredmény nem problémamentes frissítési garancia.
+
+## Fájlok
+
+- `web/index.html`, `web/registry-app.js`, `web/registry-styles.css`: a megadott prototípus alapján készült élő Registry-felület.
+- `web/lib/registry.js`: külön tesztelhető Registry-metaadat-összehasonlító.
+- `app.py`: csomagfüggőség nélküli Python HTTP- és Registry-kiszolgáló.
+- `server/registry-proxy.js`: a szerveres webes hosztolás azonos API-t adó adaptere.
+- `sites-runtime/`: a hosztolt adapter belépési pontjai és szinkronizálási útmutatója.
+- `web/opentofu.html`, `web/app.js`, `collector/`: a korábbi HCL-alapú OpenTofu-nézet.
+- `web/site.json`: projektlinkek; nem tartalmaz titkot vagy tokent.
+- `.github/workflows/`: CI, a válogatott pillanatképek frissítése és a statikus Pages-belépő csomagolása.
+
+Az alkalmazáskód MIT-licencű; a Registry-metaadatok és upstream dokumentumok a szerzőik feltételei alatt maradnak. Lásd: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+[Hivatalos Registry API](https://developer.hashicorp.com/terraform/registry/api-docs)

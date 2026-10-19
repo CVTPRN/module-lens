@@ -2,56 +2,83 @@
 <html lang="hu">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#f6f7fb">
-  <meta name="description" content="Terraform és OpenTofu modulverziók összehasonlítása. Dokumentált változások, feltételes teendők és migrációs útmutatók egy helyen.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-  <title>ModuleLens — Modulfrissítések, érthetően</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111c28">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.js"></script>
+  <title>ModuleLens · Terraform modulok összehasonlítása</title>
+  <link rel="stylesheet" href="./registry-styles.css">
+  <script type="module" src="./registry-app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Ugrás a tartalomra</a>
-  <aside class="sidebar" aria-label="Fő navigáció">
-    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">M</span><span>Module<span class="brand-light">Lens</span><small>UPGRADE INTELLIGENCE</small></span></a>
-    <div class="workspace-label">MUNKATERÜLET</div>
-    <nav>
-      <button class="nav-item active" id="nav-compare" type="button"><span data-icon="compare"></span>Összehasonlítás<span class="nav-dot"></span></button>
-      <button class="nav-item" id="nav-catalog" type="button"><span data-icon="grid"></span>Modulkatalógus<span id="nav-count" class="nav-count">—</span></button>
-      <button class="nav-item" id="nav-method" type="button"><span data-icon="book"></span>Módszertan</button>
-    </nav>
-    <div class="workspace-label module-label">GYORS ELÉRÉS</div>
-    <div id="quick-modules" class="quick-modules"></div>
-    <div class="sidebar-bottom"><div class="local-badge"><span></span>Kódod nálad marad</div><p>Nyilvános modulforrások elemzése.<br>Saját repó vagy state feltöltése nélkül.</p><button type="button" class="theme-button" id="theme-toggle"><span data-icon="sun"></span><span id="theme-label">Sötét megjelenés</span></button><a id="project-link" class="source-link" hidden target="_blank" rel="noopener noreferrer">Forráskód a GitHubon ↗</a></div>
-  </aside>
-  <div class="app-shell">
-    <header class="topbar"><div class="breadcrumb">Munkaterület <span>/</span> <strong id="breadcrumb-current">Összehasonlítás</strong></div><div class="topbar-right"><span class="catalog-state"><i></i><span id="catalog-state">Katalógus betöltése…</span></span><span class="version-label">v1.0</span></div></header>
-    <main id="main">
-      <section id="compare-view">
-        <div class="page-heading"><div><div class="eyebrow"><span></span>TERRAFORM & OPENTOFU</div><h1>Lásd, mi változik.<br><span>Frissíts felkészülten.</span></h1><p>Két modulverzió. Átlátható különbségek. Konkrét teendők.</p></div><div class="heading-art" aria-hidden="true"><div class="art-block old">{ }<small>jelenlegi</small></div><div class="art-arrow">→</div><div class="art-block new">{ }<small>következő</small><i>✓</i></div></div></div>
-        <section class="compare-panel" aria-labelledby="compare-title">
-          <div class="panel-title"><h2 id="compare-title"><span data-icon="compare"></span>Verziók összehasonlítása</h2><div class="engine-switch" role="group" aria-label="Futtatókörnyezet"><button id="engine-terraform" class="selected" aria-pressed="true" type="button">Terraform</button><button id="engine-opentofu" aria-pressed="false" type="button">OpenTofu</button></div></div>
-          <div class="selection-grid"><div class="field module-field"><label for="module-select"><span>01</span>Modul</label><select id="module-select" disabled><option>Katalógus betöltése…</option></select></div><div class="field"><label for="from-select"><span>02</span>Jelenlegi verzió</label><select id="from-select" disabled><option>Válassz modult</option></select></div><span class="select-arrow" aria-hidden="true">→</span><div class="field"><label for="to-select"><span>03</span>Célverzió</label><select id="to-select" disabled><option>Válassz modult</option></select></div><button class="button primary compare-button" id="compare-button" type="button" disabled>Összehasonlítás<span data-icon="arrow"></span></button></div>
-          <div class="panel-bottom"><div class="scope-control"><label for="scope-select">Almodul</label><select id="scope-select" disabled><option value=".">Főmodul</option></select></div><a id="upstream-link" class="text-link" target="_blank" rel="noopener noreferrer" hidden>Modul forrása<span data-icon="external"></span></a><span id="indexed-count" class="muted"></span></div>
-          <p id="version-coverage" class="coverage-note"></p>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Az alkalmazásról">
+      <a class="brand" href="./" aria-label="ModuleLens kezdőlap">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>module<span class="brand-accent">lens</span><small>Terraform intelligence</small></span>
+      </a>
+      <div class="side-content">
+        <div class="side-kicker"><span class="live-dot"></span> REGISTRY EXPLORER</div>
+        <h2>A változás<br><em>részleteiben</em> van.</h2>
+        <p>Nézd meg, pontosan mi változott két Terraform modulverzió között.</p>
+        <div class="side-rule"></div>
+        <div class="side-step"><span>01</span><div><strong>Válassz modult</strong><small>Publikus Terraform Registry</small></div></div>
+        <div class="side-step"><span>02</span><div><strong>Állítsd be a verziókat</strong><small>Almodulonként is működik</small></div></div>
+        <div class="side-step"><span>03</span><div><strong>Olvasd el a változásokat</strong><small>Inputok, outputok, jelzések</small></div></div>
+      </div>
+      <div class="side-foot"><span class="side-foot-icon">↗</span><span>Információ DevOps csapatoknak<br><small>Írásmentes összehasonlítás</small></span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">WORKSPACE <span>/</span> MODULOK <span>/</span> ÖSSZEHASONLÍTÁS</div>
+        <a class="mode-link" href="./opentofu.html?engine=opentofu">OpenTofu →</a><div class="top-pill"><span class="top-pill-dot"></span> PUBLIC REGISTRY</div>
+      </header>
+
+      <div class="content">
+        <div class="page-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> MODULVERZIÓK</div>
+          <h1>Mi változott <span>a két verzió között?</span></h1>
+          <p>Válassz egy modult és két verziót. Megmutatjuk az új, eltávolított és módosult változókat és outputokat.</p>
+        </div><div class="hero-decoration" aria-hidden="true"><div class="tile tile-a">v1<span>→</span></div><div class="tile tile-b">v2<span>↗</span></div></div></div>
+
+        <section class="panel setup-panel" aria-labelledby="setup-title">
+          <div class="panel-header"><div class="section-num">01</div><div><h2 id="setup-title">Összehasonlítás beállítása</h2><p>Keress a Registryben, vagy adj meg egy pontos modulcímet.</p></div></div>
+          <div class="panel-body">
+            <label for="module-input" class="field-label">TERRAFORM MODUL <span class="required">*</span></label>
+            <div class="search-wrap">
+              <div class="search-field"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="module-input" role="combobox" aria-autocomplete="list" type="search" placeholder="pl. terraform-google-modules/network/google" autocomplete="off" aria-controls="suggestions" aria-expanded="false" spellcheck="false"><kbd>↵</kbd></div>
+              <div id="suggestions" class="suggestions" role="listbox" hidden></div>
+            </div>
+            <div class="module-actions"><button class="text-button" id="load-module" type="button">Modul betöltése <span>↗</span></button><span class="hint">Formátum: névtér / név / provider</span></div>
+            <div id="hosting-note" class="hosting-note" role="status" hidden></div>
+            <div class="quick-picks"><span>GYORS VÁLASZTÁS</span><button class="quick-pick" data-module="terraform-google-modules/network/google" type="button">Google Network <span>↗</span></button><button class="quick-pick" data-module="terraform-google-modules/kubernetes-engine/google" type="button">Google Kubernetes Engine <span>↗</span></button><button class="quick-pick" data-module="terraform-aws-modules/vpc/aws" type="button">AWS VPC <span>↗</span></button></div>
+
+            <div class="divider"></div>
+            <div class="select-grid">
+              <div class="field"><label class="field-label" for="from-version">JELENLEGI VERZIÓ <span class="required">*</span></label><div class="select-box"><select id="from-version" disabled><option value="">Előbb válassz modult</option></select></div></div>
+              <div class="version-arrow" aria-hidden="true">→</div>
+              <div class="field"><label class="field-label" for="to-version">CÉLVERZIÓ <span class="required">*</span></label><div class="select-box"><select id="to-version" disabled><option value="">Előbb válassz modult</option></select></div></div>
+            </div>
+            <div class="submodule-row"><div><label class="field-label" for="submodule">ALMODUL</label><p>Ha a modul <code>//modules/…</code> útvonalát használod, itt válaszd ki.</p></div><div class="select-box"><select id="submodule" disabled><option value="">Gyökérmodul</option></select></div></div>
+            <div class="form-footer"><div id="status" class="status" role="status" aria-live="polite">Válassz egy modult a kezdéshez.</div><button id="compare" class="primary-button" type="button" disabled><span class="btn-symbol">⇄</span> Verziók összehasonlítása <span class="btn-arrow">↗</span></button></div>
+          </div>
         </section>
-        <div id="message" class="message" role="status" aria-live="polite" hidden></div>
-        <section id="loading" class="loading-panel" hidden aria-live="polite"><span class="spinner"></span><div><strong>Források összevetése</strong><p>Bemenetek, kimenetek, függőségek és migrációs dokumentumok…</p></div></section>
-        <div id="results" hidden>
-          <div class="results-heading"><div><div class="eyebrow">MIGRÁCIÓS RIPORT</div><h2 id="report-title"></h2><p id="report-subtitle"></p></div><div class="report-actions"><button id="share-button" type="button" class="button secondary"><span data-icon="link"></span>Link másolása</button><div class="export-control"><label class="sr-only" for="export-select">Riport exportálása</label><select id="export-select"><option value="">Exportálás ↓</option><option value="markdown">Markdown (.md)</option><option value="json">JSON (.json)</option><option value="print">Nyomtatás / PDF</option></select></div></div></div>
-          <div class="summary-grid"><div class="summary-card required"><span class="summary-icon" data-icon="alert"></span><span class="summary-number" id="count-required">0</span><strong>Kötelező teendő</strong><small>A jelzett feltétel esetén</small></div><div class="summary-card conditional"><span class="summary-icon" data-icon="edit"></span><span class="summary-number" id="count-conditional">0</span><strong>Feltételes módosítás</strong><small>A használt beállításoktól függ</small></div><div class="summary-card review"><span class="summary-icon" data-icon="eye"></span><span class="summary-number" id="count-review">0</span><strong>Ellenőrizendő változás</strong><small>Működés, függőségek, state</small></div><div class="summary-card info"><span class="summary-icon" data-icon="sparkles"></span><span class="summary-number" id="count-info">0</span><strong>Új lehetőség</strong><small>Opcionálisan használható</small></div></div>
-          <div id="verdict" class="verdict"></div>
-          <div id="parse-warnings" class="parse-warnings" hidden></div>
-          <div class="report-layout"><section class="findings-panel"><div class="tabs" role="tablist" aria-label="Riport tartalma"><button type="button" role="tab" id="tab-changes" aria-selected="true" aria-controls="changes-panel" class="selected">Változások <span id="total-count">0</span></button><button type="button" role="tab" id="tab-docs" aria-selected="false" aria-controls="docs-panel" tabindex="-1">Migrációs dokumentumok <span id="docs-count">0</span></button></div><div id="changes-panel" role="tabpanel" aria-labelledby="tab-changes"><div class="filter-row"><label class="search-field"><span data-icon="search"></span><input id="finding-search" type="search" placeholder="Keresés a változásokban…" aria-label="Keresés a változásokban"></label><label><span class="sr-only">Súlyosság</span><select id="level-filter"><option value="all">Minden besorolás</option><option value="required">Kötelező teendők</option><option value="conditional">Feltételes módosítások</option><option value="review">Ellenőrizendő</option><option value="info">Újdonságok</option></select></label><label><span class="sr-only">Kategória</span><select id="category-filter"><option value="all">Minden kategória</option><option value="input">Bemenetek</option><option value="output">Outputok</option><option value="dependency">Függőségek</option><option value="state">State</option><option value="internal">Belső működés</option><option value="module">Almodulok</option></select></label></div><p id="filter-count" class="filter-count"></p><div id="findings-list"></div></div><div id="docs-panel" role="tabpanel" aria-labelledby="tab-docs" hidden><div class="doc-intro"><strong>A karbantartó eredeti útmutatói</strong><p>A megadott verziótartomány changelog-bejegyzései és a rendelkezésre álló migrációs útmutatók. A dokumentációból származó lépéseket is ellenőrizd a saját használatod alapján.</p></div><div id="docs-list"></div></div></section>
-          <aside class="report-aside"><div class="aside-card"><div class="aside-title"><span data-icon="shield"></span>Az elemzés alapja</div><dl id="provenance"></dl><p>Az eredmények a megjelölt commitokhoz kötöttek, és később is visszakereshetők.</p></div><div class="aside-card checklist"><div class="aside-title"><span data-icon="check"></span>Frissítés előtt</div><label><input type="checkbox"> Átnéztem az érintő változásokat</label><label><input type="checkbox"> Elolvastam a migrációs útmutatót</label><label><input type="checkbox"> Egyeztettem a verziókorlátokat</label><label><input type="checkbox"> Ellenőriztem a plan eredményét</label><small>A lista helyi segédlet; nem végez ellenőrzést.</small></div><div class="aside-note"><span data-icon="info"></span><p>A modulok közötti eltéréseket látod. A saját kódod és a state nélkül a konkrét erőforráscserék vagy leállások nem állapíthatók meg.</p></div></aside></div>
-        </div>
-      </section>
-      <section id="catalog-view" hidden><div class="eyebrow">NYILVÁNOS FORRÁSOK</div><h1>Modulkatalógus</h1><p class="page-description">Válassz egy modult a verziók és az almodulok összehasonlításához.</p><label class="search-field catalog-search"><span data-icon="search"></span><input type="search" id="catalog-search" aria-label="Modul keresése" placeholder="Modul, szolgáltató vagy repository…"></label><div id="catalog-grid" class="catalog-grid"></div><div class="catalog-help"><h2>Saját modullal bővítenéd?</h2><p>Adj hozzá egy nyilvános GitHub-modult a projekt <code>modules.json</code> fájljához. A következő adatfrissítés feldolgozza a verzióit. A pontos lépéseket a Módszertan és a README tartalmazza.</p><button class="button secondary" id="catalog-method-button" type="button">Hogyan működik?<span data-icon="arrow"></span></button></div></section>
-      <footer><span class="footer-brand">ModuleLens</span><span>Forrásalapú elemzés · Terraform & OpenTofu</span><button type="button" id="footer-method">Módszertan ↗</button></footer>
+
+        <section class="registry-catalog" aria-labelledby="catalog-title">
+          <div class="catalog-heading"><div><div class="eyebrow">TELJES NYILVÁNOS KATALÓGUS</div><h2 id="catalog-title">Modulok a Terraform Registryből</h2></div><label class="provider-filter">Provider<select id="provider-filter"><option value="">Összes provider</option><option value="aws">AWS</option><option value="azurerm">Azure</option><option value="google">Google Cloud</option><option value="kubernetes">Kubernetes</option><option value="helm">Helm</option></select></label></div>
+          <p id="catalog-status" class="catalog-status" aria-live="polite">Katalógus betöltése…</p><div id="registry-grid" class="registry-grid"></div><button id="load-more" type="button" class="outline-link" hidden>További modulok betöltése</button>
+        </section>
+        <section id="results" class="results" aria-labelledby="results-title" hidden>
+          <div class="results-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> ELEMZÉS</div><h2 id="results-title">Változások áttekintése</h2><p id="comparison-label" class="comparison-label"></p></div><a id="registry-link" class="outline-link" href="https://registry.terraform.io/" target="_blank" rel="noopener noreferrer">Megnyitás a Registryben <span>↗</span></a></div>
+          <div class="report-actions"><button id="share-report" type="button" class="outline-link">Link másolása</button><button id="export-json" type="button" class="outline-link">JSON export</button><button id="export-md" type="button" class="outline-link">Markdown export</button></div><div class="stats"><div class="stat"><span class="stat-icon stat-added">＋</span><strong id="added-count">0</strong><span>Új elem</span></div><div class="stat"><span class="stat-icon stat-removed">−</span><strong id="removed-count">0</strong><span>Eltávolított</span></div><div class="stat"><span class="stat-icon stat-changed">~</span><strong id="changed-count">0</strong><span>Módosult</span></div><div class="stat"><span class="stat-icon stat-review">?</span><strong id="hint-count">0</strong><span>Lehetséges átnevezés</span></div></div>
+          <div class="result-toolbar"><div class="filter-group" aria-label="Változások szűrése"><button type="button" class="filter active" data-filter="all" aria-pressed="true">Összes <span id="all-count">0</span></button><button type="button" class="filter" data-filter="inputs" aria-pressed="false">Változók</button><button type="button" class="filter" data-filter="outputs" aria-pressed="false">Outputok</button><button type="button" class="filter" data-filter="hint" aria-pressed="false">Lehetséges átnevezések</button></div></div>
+          <p id="report-provenance" class="catalog-status"></p><div id="change-list" class="change-list"></div>
+          <div id="empty-result" class="empty-result" hidden><div class="empty-graphic" aria-hidden="true">✓</div><h3>Nem találtunk változást ebben a nézetben.</h3><p>A Registryben közzétett inputok és outputok alapján nincs megjeleníthető eltérés.</p></div>
+          <div class="scope-note"><span class="scope-icon">i</span><div><strong>Mit jelent ez az eredmény?</strong><p id="scope-text"></p><p>Az átnevezésre vonatkozó jelzés csak javaslat. Az infrastruktúrára gyakorolt hatást az adott környezetben készített Terraform plan mutatja meg.</p></div></div>
+        </section>
+        <footer class="main-foot"><a href="https://github.com/CVTPRN/module-lens" target="_blank" rel="noopener noreferrer">FORRÁSKÓD</a> <span>·</span> MODULELENS <span>·</span> TERRAFORM REGISTRY EXPLORER <span>·</span> READ-ONLY</footer>
+      </div>
     </main>
   </div>
-  <dialog id="method-dialog" aria-labelledby="method-title"><div class="dialog-top"><span class="eyebrow">ÁTLÁTHATÓ MŰKÖDÉS</span><button id="close-method" type="button" class="icon-button" aria-label="Bezárás">✕</button></div><h2 id="method-title">Mit elemez a ModuleLens?</h2><p>A Python-gyűjtő a nyilvános GitHub-modulok verziócímkéit commitokhoz rendeli, majd HCL/JSON parserrel feldolgozza a deklarációkat. A böngésző a rögzített pillanatképekből készíti a riportot. Az elemzés szabályalapú; nem használ AI-t.</p><h3>Az összehasonlítás részei</h3><ul><li>Bemenetek: hozzáadás, törlés, típus, alapérték, validáció, érzékenység és nullable/ephemeral beállítás.</li><li>Outputok, providerkövetelmények, CLI-verziókorlátok és belső modulhívások.</li><li>Erőforrás-deklarációk, moved/removed/import blokkok és eredeti migrációs dokumentumok.</li><li>Átnevezés csak explicit dokumentált megfeleltetésből, és csak ha a régi bemenet megszűnt, az új pedig megjelent.</li></ul><h3>Terraform és OpenTofu</h3><p>A Terraform elemzés a <code>.tf</code> és <code>.tf.json</code> fájlokat használja. OpenTofu esetén az azonos nevű <code>.tofu</code> és <code>.tofu.json</code> fájl elsőbbséget kap. Ez a fájlkiválasztást modellezi; a tényleges CLI-kompatibilitást nem tanúsítja.</p><h3>Amit a riportból nem lehet eldönteni</h3><p>A felhasználói kódot, state-et, provider API-kat és HCL-kifejezéseket nem értékeljük ki. Nem végzünk plan vagy apply műveletet, és nem futtatunk letöltött kódot. A típusok kompatibilitása, a feltételes erőforrások és a tényleges infrastruktúrahatás kézi ellenőrzést igényel. A lokális almodulokat külön kell kiválasztani; a függőségek tranzitív gráfját nem értékeljük ki.</p><h3>Adatlefedettség</h3><p>Modulonként a legutóbbi stabil kiadások, az utolsó három elérhető főverzió fontos pontjai és a konfigurációban rögzített verziók kerülnek indexelésre. Legfeljebb 400 tag vizsgálata történik. A listában csak a ténylegesen feldolgozott verziók szerepelnek. A köztes kiadások teljes szemantikai elemzése nem garantált; a changelog és a köztes indexelt verziók dokumentációja egészíti ki az összevetést.</p><h3>Katalógus bővítése</h3><p>A <code>modules.json</code> modulbejegyzései adják meg a repositoryt és az opcionális <code>anchors</code> verziókat. A <code>python -m collector.collect</code> parancs frissíti az adatokat. Ugyanez GitHub Actionsből is fut, a publikus weboldalon nem kell tokent megadni.</p><h3>Bizalom és korlátok</h3><p>Parserhibánál vagy nem értelmezett blokknál az eredmény hiányos jelzést kap. A hiányzó migrációs útmutató és a „nem találtunk törést” eredmény nem jelent problémamentes frissítési garanciát. Az ellenőrzőlista a böngészőben használható emlékeztető.</p><button id="method-done" class="button primary" type="button">Értem</button></dialog>
-  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>

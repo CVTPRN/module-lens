@@ -23,4 +23,6 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_*.py' -v
       - run: npm test
       - run: node --check web/app.js
+      - run: node --check web/registry-app.js
+      - run: node --check server/registry-proxy.js
       - run: python scripts/build.py

@@ -26,3 +26,5 @@ Python dependencies (installed only by the indexing/build process):
 Terraform is a trademark of HashiCorp. OpenTofu is a Linux Foundation project.
 AWS and Google Cloud product names belong to their respective owners.
 ModuleLens is an independent project and is not endorsed by those organizations.
+
+The Registry UI and Python gateway are adapted from the four source files supplied by the user in this project. Real Registry test fixtures include metadata from https://registry.terraform.io/modules/terraform-aws-modules/ec2-instance/aws and search results from the public Registry; upstream descriptions retain their authorship.
