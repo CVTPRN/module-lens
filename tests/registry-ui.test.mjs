@@ -36,10 +36,10 @@ test('live Registry flow supports all-catalog pagination, non-curated modules, f
   $('from-version').value='5.0.0';$('to-version').value='6.0.0';$('to-version').dispatchEvent(new window.Event('change'));assert.equal($('compare').disabled,false);
   $('compare').click();await wait(()=>!$('results').hidden);
   assert.match($('comparison-label').textContent,/ec2-instance/);assert.match($('comparison-label').textContent,/5.0.0 → 6.0.0/);
-  assert.match($('change-list').textContent,/Mikor érint/);assert.match($('change-list').textContent,/Teendő/);
+  assert.match($('change-list').textContent,/When (?:this applies|does this affect you)/);assert.match($('change-list').textContent,/Action/);
   assert.ok($('change-list').querySelector('a[href^="https://registry.terraform.io/modules/"]'));
   $('share-report').click();await wait(()=>clipboard().length>0);assert.match(clipboard(),/module=terraform-aws-modules%2Fec2-instance%2Faws/);
-  assert.match($('scope-text').textContent,/nem kompatibilitási garancia/);
+  assert.match($('scope-text').textContent,/not a guarantee of compatibility/);
   const hintFilter=window.document.querySelector('[data-filter="hint"]');hintFilter.click();assert.equal(hintFilter.getAttribute('aria-pressed'),'true');
   defer=true;$('load-module').click();await wait(()=>!!release);
   $('module-input').value='virtualnetwork';$('module-input').dispatchEvent(new window.Event('input'));release();

@@ -1,10 +1,8 @@
-# A hosztolt adapter
+# Optional hosted preview adapter
 
-A működő privát webes változat Vinext / Cloudflare Workers környezetben fut.
-A szerveroldali route ugyanazt a `server/registry-proxy.js` handlert használja,
-amelyet a Node-kiszolgáló és az automatikus tesztek is.
+The private preview uses Vinext / Cloudflare Workers. Its server-side route calls the same `server/registry-proxy.js` handler used by the standalone Node server and automated tests.
 
-`app/api/registry/[operation]/route.ts` a hosztolási projekt gyökeréhez képest:
+Create `app/api/registry/[operation]/route.ts` relative to the hosting project root:
 
 ```typescript
 import { handleRegistry } from "../../../../server/registry-proxy.js";
@@ -14,12 +12,8 @@ export async function GET(request: Request) {
 }
 ```
 
-A hosztolási projekt `public/` könyvtára a repó `web/` fájljait tartalmazza;
-az alapoldal a `/index.html` címre irányít. A `server/` és a
-`web/lib/registry.js` a repóból szinkronizált alkalmazáskód, nem külön
-összehasonlítási implementáció.
+The hosting project copies the repository `web/` files into `public/`; its root page redirects to `/index.html`. The `server/` directory and `web/lib/registry.js` are synchronized from this repository rather than maintaining a separate comparison implementation.
 
-A hosztolási platform hozzáférési és build-integrációja a Sites-projekt része.
-Saját tárhelyhez nem szükséges ez a keretrendszer: a repóban található teljes
-`app.py`, Dockerfile vagy `node server/node-server.js` önállóan futtatja az
-alkalmazást és az élő API-t. Privát projekthez tartozó token nem része a repónak.
+Access control and build integration belong to the Sites project. This framework is optional: `app.py`, the Dockerfile or `node server/node-server.js` can independently run the full application and live API. Private project tokens are not stored in this repository.
+
+The primary public application is hosted on [Render](https://module-lens.onrender.com).

@@ -1,38 +1,36 @@
 # ModuleLens
 
-Terraform-modulok keresése a **teljes nyilvános Terraform Registryben**, minden publikált verzió lekérésével és két verzió összehasonlításával.
+Search the **full public Terraform Registry**, load every published module version and compare two releases to understand what changed and when your configuration may need updating.
 
-Az új kereső a felhasználó által megadott `app.py`, `app.js`, `index.html` és `styles.css` prototípusra épül. A korábbi OpenTofu-elemző külön nézetben megmaradt.
+**[Open ModuleLens](https://module-lens.onrender.com)** · [Source code](https://github.com/CVTPRN/module-lens)
 
-[Nyilvános webes alkalmazás](https://module-lens.onrender.com)
+The application interface, generated guidance, exports and project documentation are in English. Upstream identifiers, code examples and quoted documentation retain their original content.
 
-## Terraform Registry: élő működés
+## Live Terraform Registry explorer
 
-- Kulcsszavas keresés és pontos `névtér/név/provider` modulcím megadása.
-- Registry-oldal URL-je és `//modules/...` almodulcím is használható.
-- A teljes nyilvános katalógus böngészése és lapozása, előre megadott modullista nélkül.
-- Provider szerinti szűrés; az összes provider választható moduljai elérhetők.
-- Minden közzétett szemverziós verzió lekérése, prerelease-támogatással.
-- Két verzióhoz tartozó almodulok kiválasztása.
-- Új, törölt és módosult inputok/outputok; elérhető provider- és modulfüggőségek; erőforráslisták.
-- Minden eltérés mellett érintettségi feltétel, teendő és Registry-forráshivatkozás.
-- Lehetséges átnevezések külön, bizonytalan javaslatként; a törlést és hozzáadást nem fedik el.
-- JSON/Markdown export és megosztható összehasonlítási URL.
-- Mobilon is használható magyar felület, billentyűzetes keresési találatválasztás.
+- Search by keyword or enter an exact `namespace/name/provider` module address.
+- Paste a Registry page URL or a `//modules/...` submodule address.
+- Browse and paginate the full public catalog without a predefined module list.
+- Filter by provider; modules from all providers remain accessible.
+- Load all published semantic versions, including prereleases.
+- Select submodules across the two chosen releases.
+- Review added, removed and changed inputs, outputs, available provider requirements, module dependencies and resource lists.
+- See applicability conditions, suggested actions and Registry evidence links for each finding.
+- Review possible renames as uncertain hints; their additions and removals remain visible separately.
+- Export JSON or Markdown reports and share comparison URLs.
+- Use a responsive interface with keyboard navigation for search suggestions.
 
-A „teljes Registry” az élő API keresési tartományát jelenti, nem minden modul helyi másolatát. Egyszerre 24 találat töltődik be; a **További modulok betöltése** folytatja a lapozást. Nincs kézzel karbantartandó Terraform-modul-lista vagy indexeltverzió-korlát.
+“Full Registry” describes the live API search scope, not a local copy of every module. The catalog loads 24 results at a time; **Load more modules** continues pagination. Terraform search has no curated module list or indexed-version limit.
 
-## Indítás helyben
+## Run locally
 
-A teljes alkalmazáshoz **Python 3.12+** elég; a szerver nem igényel külső Python-csomagot:
+The complete application requires **Python 3.12+** and no third-party Python packages at runtime:
 
 ```bash
 python app.py --port 8080
 ```
 
-Nyisd meg: **http://localhost:8080/**.
-
-A szerver ugyanarról az originről szolgálja ki a felületet és az élő Registry API-t. Tokent vagy saját kódot nem kell megadni. A `npm run serve` is ezt a szervert indítja.
+Open **http://localhost:8080/**. The same server serves the interface and live Registry API. No token or user code is required. `npm run serve` starts the same server.
 
 ### Docker
 
@@ -40,50 +38,46 @@ A szerver ugyanarról az originről szolgálja ki a felületet és az élő Regi
 docker compose up --build
 ```
 
-Alapértelmezetten csak a helyi gépen, a **http://localhost:8080/** címen figyel. Saját hosztoláshoz a Dockerfile használható tetszőleges konténerfuttatón; az alkalmazás a konténer 8080-as portján működik.
+Compose binds to **http://localhost:8080/** on the local machine by default. For hosting, use the Dockerfile on a container platform; the application listens on port `8080` inside the container.
 
-## GitHub és hosztolás
+### Node.js
 
-A teljes forráskód a https://github.com/CVTPRN/module-lens repóban van.
-
-**GitHub Pages önmagában nem futtatja az élő Registry API-t.** A Registry válaszai jelenleg nem adnak böngészős, más originről használható CORS-engedélyt, ezért a weboldalnak szerveroldali közvetítés kell. A statikus Pages-oldal ezt világosan jelzi, és konfigurált hosztolt alkalmazás esetén annak linkjét mutatja; nem állítja, hogy a keresés API nélkül működik.
-
-Támogatott futtatási módok:
-
-| Mód | Élő teljes Registry | OpenTofu-pillanatképek |
-|---|---|---|
-| `python app.py` | Igen | Igen |
-| Docker | Igen | Igen |
-| Szerveres webes hosztolás | Igen | Igen |
-| GitHub Pages / statikus tárhely | Külön szerveres alkalmazás szükséges | Igen |
-
-A nyilvános Render-változat teljes weboldalt és szerveroldali API-t tartalmaz. A korábbi privát előnézet hozzáférési beállításai ettől függetlenek.
-
-Node.js 22+ környezetben csomagtelepítés nélkül is indítható:
+Node.js 22+ is also supported without installing runtime packages:
 
 ```bash
 node server/node-server.js
 ```
 
-A `PORT` és `HOST` környezeti változókkal konfigurálható.
+Configure this server with the `PORT` and `HOST` environment variables.
 
-### Render Free telepítés
+## Hosting and GitHub Pages
 
-A gyökérkönyvtár `render.yaml` fájlja a teljes alkalmazás telepítését írja le:
+**GitHub Pages cannot run the live Registry API.** Registry responses do not provide the cross-origin browser access needed by this application, so live search uses a server-side gateway. The static Pages entry explains this and links to the hosted application configured in `web/site.json`.
 
-- Egyetlen **Free web service**, Frankfurt régióban, a meglévő Dockerfile használatával.
-- A felület és az élő Registry API ugyanazon a címen működik.
-- A `main` ág minden új commitja után automatikus újratelepítés (`autoDeployTrigger: commit`). A GitHub CI külön ellenőrzi a változtatásokat.
-- Az alkalmazás állapota a `/api/registry/health` útvonalon ellenőrizhető; alkalmazásport: `8080`.
-- Nem hoz létre adatbázist, lemezt vagy fizetős szolgáltatást.
+| Deployment | Live Registry explorer | OpenTofu snapshots |
+|---|---|---|
+| Python server | Yes | Yes |
+| Docker | Yes | Yes |
+| Node.js server | Yes | Yes |
+| Render web service | Yes | Yes |
+| GitHub Pages / static hosting | Requires a separate API server | Yes |
 
-Az éles szolgáltatás a **My Workspace** munkaterületen, a Render-integráción keresztül jött létre. [Render kezelőfelület](https://dashboard.render.com/web/srv-dbb0l6cs728c739vo49g). A `render.yaml` az ismételhető telepítési konfiguráció; az éles szolgáltatás nincs Blueprinthez kapcsolva, így a YAML módosításai önmagukban nem írják át a Render beállításait.
+### Render Free
 
-Az ingyenes szolgáltatás 15 perc inaktivitás után leáll; a következő kérés újraindítja, ami körülbelül egy percig tarthat. A Free keretek és a sávszélesség/build korlátai a [Render dokumentációjában](https://render.com/docs/free) találhatók.
+The public application runs in **My Workspace**, in the **Frankfurt** region, on a **Free web service** using the repository Dockerfile. [Render dashboard](https://dashboard.render.com/web/srv-dbb0l6cs728c739vo49g).
+
+- The interface and API share one origin.
+- The service tracks the `main` branch. GitHub CI checks application changes independently.
+- Health endpoint: `/api/registry/health`; application port: `8080`.
+- No database or persistent disk is required.
+- `render.yaml` records reproducible deployment settings. The current service was created through the Render integration and is not linked to a Blueprint; editing the YAML alone does not change its settings.
+- Automatic deploys are configured for commits, but require a working Git provider connection. Verify that a new deployment starts after a push. If it does not, deploy the latest commit through the Render integration or dashboard.
+
+The free service spins down after 15 minutes of inactivity; the next request can take about a minute to start it again. See [Render Free documentation](https://render.com/docs/free) for quotas and build/bandwidth limits.
 
 ## API
 
-Mindkét kiszolgáló ugyanazt a korlátozott, csak olvasásra alkalmas API-t biztosítja:
+The Python and JavaScript servers provide the same read-only API:
 
 ```text
 GET /api/registry/health
@@ -92,26 +86,28 @@ GET /api/registry/versions?module=terraform-aws-modules/ec2-instance/aws
 GET /api/registry/module?module=terraform-aws-modules/ec2-instance/aws&version=6.0.0
 ```
 
-Üres `q` esetén a Registry teljes katalóguslistájából történik a lapozás. A frontend a kiválasztott két verzió metaadatait hasonlítja össze; nem kell összehasonlítási feladatot indítani GitHub Actionsben.
+An empty `q` browses the full catalog. The browser compares metadata for the selected versions; comparisons do not require a GitHub Actions job.
 
-A Python-szerver (`app.py`) és a hosztolt JavaScript-adapter (`server/registry-proxy.js`) kizárólag a rögzített `registry.terraform.io/v1/modules` originre küld GET kéréseket. Nincs tetszőleges URL-proxy, nincs upstream átirányítás-követés, és a látogatók cookie-ja vagy Authorization fejléce nem kerül a Registryhez. Időkorlát, válaszméret-korlát és korlátozott memóriás gyorsítótár védi a lekéréseket.
+Both `app.py` and `server/registry-proxy.js` send GET requests only to the fixed `registry.terraform.io/v1/modules` upstream. They do not accept arbitrary proxy URLs, follow upstream redirects or forward visitor cookies or Authorization headers. Requests have timeouts, response size limits and bounded in-memory caches.
 
-## OpenTofu nézet
+## OpenTofu snapshot view
 
-A **OpenTofu →** link az `opentofu.html` oldalt nyitja meg. Ez megőrzi az eredeti, forrásból feldolgozott HCL/JSON-pillanatképek összehasonlítását, a `.tofu` fájlok elsőbbségét és a dokumentált migrációs útmutatókat.
+The **OpenTofu →** link opens `opentofu.html`. This view compares HCL/JSON snapshots parsed from module sources, respects `.tofu` file precedence and includes documented migration guides.
 
-Ebben a nézetben továbbra is a `modules.json` szerinti válogatott katalógus és verziók szerepelnek: AWS EKS, VPC, S3; Google Network és GKE. Az élő teljes Registry-keresés a Terraform főoldalon érhető el.
+It uses the curated catalog and versions configured in `modules.json`: AWS EKS, VPC and S3, plus Google Network and GKE. The live full-Registry search is available on the Terraform home page.
 
 ```bash
-# OpenTofu-pillanatképek frissítése
+# Refresh source snapshots
 python -m pip install -r requirements.txt
 python -m collector.collect
 
-# Egy modul frissítése
-python -m collector.collect --only aws-eks
+# Refresh a single module
+python -m collector.collect --module aws-eks
 ```
 
-## Tesztelés
+To add a public module, add its repository and optional anchor versions to `modules.json`, then refresh the catalog. Only processed versions are listed. The collector examines up to 400 tags, selecting recent stable releases, key releases from the last three major versions and configured anchors.
+
+## Verification
 
 ```bash
 python -m pip install -r requirements.txt
@@ -121,29 +117,30 @@ npm test
 python scripts/build.py
 ```
 
-A tesztek között szerepel valódi EC2 Registry-moduladatok összehasonlítása (az eredeti öt modultól függetlenül), 1200 verzió kezelése, szemverziós sorrend, hiányzó Registry-mezők, feltételes teendők, lapozás, providerfilter, elavult aszinkron válaszok, HTTP útvonalvédelem és a meglévő OpenTofu-folyamat.
+Tests cover real EC2 Registry metadata, lists of 1,200 versions, semantic version ordering, missing metadata, conditional actions, pagination, provider filtering, stale asynchronous responses, HTTP path protection and the OpenTofu workflow. The build validates all 102 bundled snapshots.
 
-A DOM-tesztek nem vizuális böngészőtesztek. A részletes ellenőrzési állapotot a `VALIDATION.md` tartalmazza.
+DOM tests check behavior, not visual browser rendering. See [VALIDATION.md](VALIDATION.md) for verification results and limitations.
 
-## Az eredmények korlátai
+## Interpretation and limitations
 
-A Terraform Registry nézet **a közzétett metaadatokat** hasonlítja össze. Nem értékeli a felhasználó kódját, a kifejezéseket, outputértékeket, validációs blokkokat vagy state-et, és nem vizsgálja a köztes kiadások teljes migrációs történetét. Egy hiányzó Registry-mező nem bizonyít törlést vagy kódváltozást; az ilyen eltérés ellenőrizendőként jelenik meg.
+The Terraform view compares **published Registry metadata**. It does not analyze user configuration, evaluate expressions or output values, inspect validation blocks or state, or reconstruct the complete migration history of intermediate releases. A missing Registry field does not prove a deletion or code change; it is flagged for review.
 
-A lehetséges átnevezés hasonló névből és azonos részletes leírásból származó javaslat. Nem bizonyított megfeleltetés, ezért a régi és az új elem önállóan is szerepel.
+Possible renames are suggestions based on similar names and identical detailed descriptions. They are not proven mappings, so both the removed and added items remain listed.
 
-A tényleges infrastruktúrahatást a saját környezetben készített Terraform/OpenTofu plan alapján kell megítélni. Az „itt nem találtunk eltérést” eredmény nem problémamentes frissítési garancia.
+The OpenTofu view analyzes source declarations and selected migration documents. Parser errors mark results as incomplete. Local submodules must be selected separately; transitive dependencies are not fully evaluated.
 
-## Fájlok
+Use a Terraform/OpenTofu plan in your own environment to assess actual infrastructure impact. Finding no differences is not a guarantee of a trouble-free upgrade.
 
-- `web/index.html`, `web/registry-app.js`, `web/registry-styles.css`: a megadott prototípus alapján készült élő Registry-felület.
-- `web/lib/registry.js`: külön tesztelhető Registry-metaadat-összehasonlító.
-- `app.py`: csomagfüggőség nélküli Python HTTP- és Registry-kiszolgáló.
-- `server/registry-proxy.js`: a szerveres webes hosztolás azonos API-t adó adaptere.
-- `sites-runtime/`: a hosztolt adapter belépési pontjai és szinkronizálási útmutatója.
-- `web/opentofu.html`, `web/app.js`, `collector/`: a korábbi HCL-alapú OpenTofu-nézet.
-- `web/site.json`: projektlinkek; nem tartalmaz titkot vagy tokent.
-- `.github/workflows/`: CI, a válogatott pillanatképek frissítése és a statikus Pages-belépő csomagolása.
+## Repository structure
 
-Az alkalmazáskód MIT-licencű; a Registry-metaadatok és upstream dokumentumok a szerzőik feltételei alatt maradnak. Lásd: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- `web/index.html`, `web/registry-app.js`, `web/registry-styles.css`: live Registry interface, adapted from the supplied prototype.
+- `web/lib/registry.js`: independently testable Registry metadata comparison.
+- `app.py`: dependency-free Python HTTP and Registry server.
+- `server/registry-proxy.js`, `server/node-server.js`: JavaScript gateway and standalone Node server.
+- `sites-runtime/`: documentation for the optional hosted preview adapter.
+- `web/opentofu.html`, `web/app.js`, `web/lib/compare.js`, `collector/`: HCL-based snapshot comparison.
+- `modules.json`: curated snapshot catalog configuration.
+- `.github/workflows/`: CI, snapshot refresh and static Pages deployment.
+- `render.yaml`: reproducible Render service configuration.
 
-[Hivatalos Registry API](https://developer.hashicorp.com/terraform/registry/api-docs)
+Application code is MIT-licensed. Registry metadata and upstream documentation remain subject to their authors' terms. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

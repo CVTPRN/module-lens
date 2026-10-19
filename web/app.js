@@ -27,8 +27,8 @@ function safeLink(url, label, cls='') {
   catch {return element('span',cls,label);}
   return a;
 }
-const levelLabels={required:'Kötelező teendő',conditional:'Feltételes módosítás',review:'Ellenőrizendő',info:'Új lehetőség'};
-const categoryLabels={input:'Bemenet',output:'Output',dependency:'Függőség',internal:'Belső működés',state:'State',module:'Almodul'};
+const levelLabels={required:'Required action',conditional:'Conditional change',review:'Needs review',info:'New capability'};
+const categoryLabels={input:'Input',output:'Output',dependency:'Dependency',internal:'Internals',state:'State',module:'Submodule'};
 const levelIcons={required:'alert',conditional:'edit',review:'eye',info:'sparkles'};
 const state={catalog:null,module:null,engine:'terraform',report:null,documents:[],cache:new Map(),loadId:0,reportId:0};
 const params=new URLSearchParams(location.search);
@@ -38,9 +38,9 @@ function toast(text) {$('toast').textContent=text;$('toast').hidden=false;clearT
 function message(text,error=false) {$('message').textContent=text;$('message').classList.toggle('error',error);$('message').hidden=!text;}
 async function fetchJSON(url) {
   const response=await fetch(url);
-  if(!response.ok)throw new Error(`Az adatfájl nem érhető el (${response.status}). Próbáld újra, vagy ellenőrizd a katalógus frissítését.`);
+  if(!response.ok)throw new Error(`The data file is unavailable (${response.status}). Try again or check the catalog refresh.`);
   if(String(url).endsWith('.gz')) {
-    if(!('DecompressionStream' in window))throw new Error('A böngésző nem támogatja a tömörített pillanatképek olvasását. Használj aktuális Chrome, Firefox, Edge vagy Safari böngészőt.');
+    if(!('DecompressionStream' in window))throw new Error('Your browser cannot read compressed snapshots. Use an up-to-date version of Chrome, Firefox, Edge or Safari.');
     return new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).json();
   }
   return response.json();
@@ -48,14 +48,14 @@ async function fetchJSON(url) {
 function snapshot(entry, engine=state.engine) {
   const url=entry.snapshots[engine];
   // All catalog paths must remain within this static site, including imported data.
-  if(!/^data\/[a-zA-Z0-9_.-]+\/(terraform|opentofu)\/v?\d+\.\d+\.\d+\.json\.gz$/.test(url))throw new Error('Érvénytelen katalógusútvonal.');
+  if(!/^data\/[a-zA-Z0-9_.-]+\/(terraform|opentofu)\/v?\d+\.\d+\.\d+\.json\.gz$/.test(url))throw new Error('Invalid catalog path.');
   if(!state.cache.has(url)) {const pending=fetchJSON(new URL(url,document.baseURI)).catch(error=>{state.cache.delete(url);throw error;});state.cache.set(url,pending);}
   return state.cache.get(url);
 }
 function option(value,text) {const o=element('option','',text);o.value=value;return o;}
 function selectValue(select,value,fallback) {select.value=value;if(select.value!==value)select.value=fallback;}
-function dateLabel(value) {const date=new Date(value);return Number.isNaN(date.getTime())?'ismeretlen':date.toLocaleDateString('hu-HU',{year:'numeric',month:'short',day:'numeric'});}
-function setNav(view) {const isCatalog=view==='catalog';$('compare-view').hidden=isCatalog;$('catalog-view').hidden=!isCatalog;$('nav-compare').classList.toggle('active',!isCatalog);$('nav-catalog').classList.toggle('active',isCatalog);$('breadcrumb-current').textContent=isCatalog?'Modulkatalógus':'Összehasonlítás';}
+function dateLabel(value) {const date=new Date(value);return Number.isNaN(date.getTime())?'unknown':date.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
+function setNav(view) {const isCatalog=view==='catalog';$('compare-view').hidden=isCatalog;$('catalog-view').hidden=!isCatalog;$('nav-compare').classList.toggle('active',!isCatalog);$('nav-catalog').classList.toggle('active',isCatalog);$('breadcrumb-current').textContent=isCatalog?'Module catalog':'Comparison';}
 function invalidateReport() {state.reportId++;$('results').hidden=true;state.report=null;$('loading').hidden=true;message('');}
 
 function fillCatalog() {
@@ -66,7 +66,7 @@ function fillCatalog() {
     const provider=()=>element('span',`provider-square ${module.provider==='google'?'google':''}`,module.provider==='aws'?'aws':'G');
     const button=element('button','quick-module');button.type='button';button.append(provider(),document.createTextNode(module.name));button.addEventListener('click',()=>openModule(module.id));quick.append(button);
     const card=element('button','catalog-card');card.type='button';card.dataset.search=`${module.id} ${module.name} ${module.provider} ${module.repository} ${module.description}`.toLowerCase();
-    card.append(provider(),element('h2','',module.name),element('p','',module.description),element('span','card-meta',`${module.versions.length} indexelt verzió · ${module.scopes.length} modulútvonal`),element('span','card-action','Verziók összehasonlítása →'));
+    card.append(provider(),element('h2','',module.name),element('p','',module.description),element('span','card-meta',`${module.versions.length} indexed versions · ${module.scopes.length} module paths`),element('span','card-action','Compare versions →'));
     card.addEventListener('click',()=>openModule(module.id));grid.append(card);
   }
   $('nav-count').textContent=state.catalog.modules.length;
@@ -85,8 +85,8 @@ async function chooseModule(id, from, to, scope) {
   const defaultTo=example?'v21.0.0':versions[0].tag;
   selectValue($('from-select'),from||defaultFrom,defaultFrom);selectValue($('to-select'),to||defaultTo,defaultTo);
   $('upstream-link').href=`https://github.com/${module.repository}`;$('upstream-link').hidden=false;
-  $('indexed-count').textContent=`${versions.length} indexelt verzió`;
-  $('version-coverage').textContent=`Katalógus: ${dateLabel(module.updated_at)} · Válogatott stabil kiadások; nem minden verzió érhető el. Egy további kiadás az anchors listával indexelhető.${module.stale?' Figyelem: az utolsó adatfrissítés sikertelen, korábbi adatokat látsz.':''}`;
+  $('indexed-count').textContent=`${versions.length} indexed versions`;
+  $('version-coverage').textContent=`Catalog: ${dateLabel(module.updated_at)} · Selected stable releases; not every version is available. Add a release to the anchors list to index it.${module.stale?' Warning: the latest refresh failed; you are viewing older data.':''}`;
   $('compare-button').disabled=true;$('scope-select').disabled=true;
   try {await fillScopes(scope,loadId);if(loadId!==state.loadId)return;$('compare-button').disabled=false;await runComparison();}
   catch(error) {if(loadId===state.loadId)message(error.message,true);}
@@ -95,11 +95,11 @@ async function chooseModule(id, from, to, scope) {
 async function fillScopes(preferred='.',loadId=state.loadId) {
   const module=state.module, engine=state.engine;
   const selected=[module.versions.find(v=>v.tag===$('from-select').value),module.versions.find(v=>v.tag===$('to-select').value)];
-  if(selected.some(v=>!v))throw new Error('A kiválasztott verzió nem található a katalógusban.');
+  if(selected.some(v=>!v))throw new Error('The selected version was not found in the catalog.');
   const snaps=await Promise.all(selected.map(entry=>snapshot(entry,engine)));
   if(loadId!==state.loadId)return;
   const scopes=[...new Set(snaps.flatMap(s=>Object.keys(s.scopes)))].sort((a,b)=>a==='.'?-1:b==='.'?1:a.localeCompare(b));
-  $('scope-select').replaceChildren(...scopes.map(path=>option(path,path==='.'?'Főmodul':path)));
+  $('scope-select').replaceChildren(...scopes.map(path=>option(path,path==='.'?'Root module':path)));
   selectValue($('scope-select'),preferred,scopes.includes('.')?'.':scopes[0]);$('scope-select').disabled=false;
 }
 
@@ -111,7 +111,7 @@ async function runComparison() {
   const from=$('from-select').value,to=$('to-select').value,scope=$('scope-select').value;
   message('');$('results').hidden=true;$('loading').hidden=false;$('compare-button').disabled=true;
   try {
-    if(compareVersions(from,to)>=0)throw new Error('Válassz a jelenlegi verziónál újabb célverziót.');
+    if(compareVersions(from,to)>=0)throw new Error('Choose a target version newer than the current version.');
     const entries=module.versions.filter(v=>v.tag===from||compareVersions(v.tag,from)>0&&compareVersions(v.tag,to)<=0);
     const snaps=await Promise.all(entries.map(v=>snapshot(v,engine)));
     if(reportId!==state.reportId)return;
@@ -129,23 +129,23 @@ async function runComparison() {
 function renderReport() {
   const r=state.report;
   $('results').hidden=false;$('report-title').textContent=`${state.module.name} · ${r.from} → ${r.to}`;
-  $('report-subtitle').textContent=`${r.engine==='terraform'?'Terraform':'OpenTofu'} · ${r.scope==='.'?'Főmodul':r.scope} · ${r.findings.length} azonosított eltérés`;
+  $('report-subtitle').textContent=`${r.engine==='terraform'?'Terraform':'OpenTofu'} · ${r.scope==='.'?'Root module':r.scope} · ${r.findings.length} differences identified`;
   for(const level of Object.keys(levelLabels))$(`count-${level}`).textContent=r.counts[level];
   $('total-count').textContent=r.findings.length;$('docs-count').textContent=state.documents.length;
-  const verdicts={incomplete:['Az elemzés hiányos — kézi felülvizsgálat szükséges.','Egy vagy több forrásfájlt nem tudtunk teljesen értelmezni. A feltárt változások mellett további eltérések is lehetnek.'],
-    required:['Módosítást igénylő változást találtunk.','Ellenőrizd az egyes tételek érintettségi feltételét, és készítsd elő a szükséges módosításokat.'],
-    conditional:['Bizonyos beállítások használatakor módosítás szükséges.','A saját kódod nélkül nem dönthető el, mely tételek érintenek. Minden változásnál megmutatjuk a feltételt.'],
-    review:['Ellenőrizendő működésbeli vagy függőségi eltérések vannak.','A bemenetek átírása nélkül is változhat a működés. Nézd át a dokumentációt és a plan eredményét.'],
-    'no-breaking-found':['A vizsgált deklarációkban nem találtunk kötelező módosítást.','Ez nem bizonyít teljes kompatibilitást. Ellenőrizd a dokumentációt és a plan eredményét.']};
+  const verdicts={incomplete:['Analysis is incomplete — manual review required.','One or more source files could not be fully parsed. Additional changes may exist beyond those listed.'],
+    required:['Changes requiring action were found.','Check when each finding applies and prepare the necessary changes.'],
+    conditional:['Changes are required for certain configurations.','We cannot determine which findings affect you without your code. Each finding explains when it applies.'],
+    review:['Behavior or dependency changes need review.','Behavior can change even without input changes. Review the documentation and your plan.'],
+    'no-breaking-found':['No required changes found in the analyzed declarations.','This does not prove full compatibility. Review the documentation and your plan.']};
   const [title,body]=verdicts[r.status],content=element('div');content.append(element('strong','',title),element('p','',body));$('verdict').replaceChildren(icon('info'),content);
   const warnings=$('parse-warnings');warnings.hidden=!r.warnings.length;
-  warnings.replaceChildren(element('strong','','Feldolgozási korlátok'));
-  const ul=element('ul');for(const w of r.warnings){const li=element('li','',`${w.file}: ${w.message} `);if(w.source)li.append(safeLink(w.source,'Forrás ↗'));ul.append(li);}warnings.append(ul);
+  warnings.replaceChildren(element('strong','','Parsing limitations'));
+  const ul=element('ul');for(const w of r.warnings){const li=element('li','',`${w.file}: ${w.message} `);if(w.source)li.append(safeLink(w.source,'Source ↗'));ul.append(li);}warnings.append(ul);
   $('finding-search').value='';$('level-filter').value='all';$('category-filter').value='all';
   renderFindings();renderDocs();selectTab('changes');
   const provenance=$('provenance');provenance.replaceChildren();
-  for(const[label,text]of [['Elemzés','Deklarációk + dokumentáció'],['Katalógus',dateLabel(r.catalog_updated_at)],['Kiinduló commit',r.from_sha.slice(0,12)],['Cél commit',r.to_sha.slice(0,12)],['Forrás',r.repository]]) {
-    const dd=element('dd');if(label.includes('commit'))dd.append(safeLink(`https://github.com/${r.repository}/commit/${label==='Cél commit'?r.to_sha:r.from_sha}`,text));else dd.textContent=text;provenance.append(element('dt','',label),dd);
+  for(const[label,text]of [['Analysis','Declarations + documentation'],['Catalog',dateLabel(r.catalog_updated_at)],['Current commit',r.from_sha.slice(0,12)],['Target commit',r.to_sha.slice(0,12)],['Source',r.repository]]) {
+    const dd=element('dd');if(label.includes('commit'))dd.append(safeLink(`https://github.com/${r.repository}/commit/${label==='Target commit'?r.to_sha:r.from_sha}`,text));else dd.textContent=text;provenance.append(element('dt','',label),dd);
   }
   for(const input of document.querySelectorAll('.checklist input'))input.checked=false;
 }
@@ -153,33 +153,33 @@ function renderReport() {
 function cleanDeclaration(value) {if(Array.isArray(value))return value.map(cleanDeclaration);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([k])=>!k.startsWith('_')).map(([k,v])=>[k,cleanDeclaration(v)]));return value;}
 function renderFindings() {
   if(!state.report)return;
-  const query=$('finding-search').value.toLocaleLowerCase('hu'),level=$('level-filter').value,category=$('category-filter').value;
-  const filtered=state.report.findings.filter(f=>(level==='all'||f.level===level)&&(category==='all'||f.category===category)&&`${f.title} ${f.detail} ${f.condition} ${f.action}`.toLocaleLowerCase('hu').includes(query));
+  const query=$('finding-search').value.toLocaleLowerCase('en'),level=$('level-filter').value,category=$('category-filter').value;
+  const filtered=state.report.findings.filter(f=>(level==='all'||f.level===level)&&(category==='all'||f.category===category)&&`${f.title} ${f.detail} ${f.condition} ${f.action}`.toLocaleLowerCase('en').includes(query));
   const rank={required:0,conditional:1,review:2,info:3};filtered.sort((a,b)=>rank[a.level]-rank[b.level]);
-  $('filter-count').textContent=`${filtered.length} / ${state.report.findings.length} változás`;
+  $('filter-count').textContent=`${filtered.length} / ${state.report.findings.length} changes`;
   const list=$('findings-list');list.replaceChildren();
-  if(!filtered.length){const empty=element('div','empty-state');empty.append(element('strong','',state.report.findings.length?'Nincs a szűrésnek megfelelő változás.':'Nem találtunk eltérő deklarációt.'),document.createTextNode(state.report.findings.length?'Módosítsd a keresést vagy a szűrőket.':'A migrációs dokumentumokat és a működésbeli hatásokat ettől még ellenőrizd.'));list.append(empty);return;}
+  if(!filtered.length){const empty=element('div','empty-state');empty.append(element('strong','',state.report.findings.length?'No changes match your filters.':'No declaration differences found.'),document.createTextNode(state.report.findings.length?'Adjust your search or filters.':'Still review migration documents and behavioral impacts.'));list.append(empty);return;}
   filtered.forEach((f,index)=>{
     const item=element('details',`finding ${f.level}`);item.open=index<2;
     const summary=element('summary'),symbol=element('span','finding-icon');symbol.append(icon(levelIcons[f.level]));
     const heading=element('div'),labels=element('div','finding-labels');labels.append(element('span',`badge ${f.level}`,levelLabels[f.level]),element('span','category-label',categoryLabels[f.category]));heading.append(element('div','finding-title',f.title),labels);summary.append(symbol,heading);
     const body=element('div','finding-body');body.append(element('p','',f.detail));
-    const condition=element('div','condition');condition.append(element('strong','','Mikor érint? '),document.createTextNode(f.condition));body.append(condition);
-    const action=element('p','action');action.append(element('strong','','Teendő: '),document.createTextNode(f.action));body.append(action);
+    const condition=element('div','condition');condition.append(element('strong','','When does this affect you? '),document.createTextNode(f.condition));body.append(condition);
+    const action=element('p','action');action.append(element('strong','','Action: '),document.createTextNode(f.action));body.append(action);
     const pair=element('div','code-pair');
-    const codeBefore=f.sample?.before??(f.before===null?'# Nincs deklaráció':hcl(cleanDeclaration(f.before)));
-    const codeAfter=f.sample?.after??(f.after===null?'# Nincs deklaráció':hcl(cleanDeclaration(f.after)));
-    for(const[label,text,cls]of [[f.sample?'Előtte · általános példa':'Régi deklaráció',codeBefore,'old'],[f.sample?'Utána · általános példa':'Új deklaráció',codeAfter,'new']]) {const box=element('div',`code-box ${cls}`);box.append(element('div','code-label',label),element('pre','',text));pair.append(box);}body.append(pair);
-    const sources=element('div','sources');sources.append(element('span','','Bizonyíték:'));
-    f.sources.forEach((url,i)=>{const a=safeLink(url,`Forrás ${i+1}`);a.append(icon('external'));sources.append(a);});body.append(sources);
+    const codeBefore=f.sample?.before??(f.before===null?'# No declaration':hcl(cleanDeclaration(f.before)));
+    const codeAfter=f.sample?.after??(f.after===null?'# No declaration':hcl(cleanDeclaration(f.after)));
+    for(const[label,text,cls]of [[f.sample?'Before · generic example':'Previous declaration',codeBefore,'old'],[f.sample?'After · generic example':'New declaration',codeAfter,'new']]) {const box=element('div',`code-box ${cls}`);box.append(element('div','code-label',label),element('pre','',text));pair.append(box);}body.append(pair);
+    const sources=element('div','sources');sources.append(element('span','','Evidence:'));
+    f.sources.forEach((url,i)=>{const a=safeLink(url,`Source ${i+1}`);a.append(icon('external'));sources.append(a);});body.append(sources);
     item.append(summary,body);list.append(item);
   });
 }
 
 function renderDocs() {
   const list=$('docs-list');list.replaceChildren();
-  if(!state.documents.length){const empty=element('div','empty-state');empty.append(element('strong','','Nem találtunk releváns migrációs dokumentumot.'),document.createTextNode('Ez nem jelenti azt, hogy nincs szükség migrációra. Ellenőrizd a modul karbantartójának dokumentációját.'));list.append(empty);return;}
-  for(const doc of state.documents){const details=element('details','document');details.append(element('summary','',`${doc.kind==='guide'?'Útmutató':'Changelog'} · ${doc.path}`),safeLink(doc.url,`Eredeti dokumentum · ${doc.tag} ↗`),element('pre','',doc.text));list.append(details);}
+  if(!state.documents.length){const empty=element('div','empty-state');empty.append(element('strong','','No relevant migration documents found.'),document.createTextNode('This does not mean migration is unnecessary. Check the module maintainer documentation.'));list.append(empty);return;}
+  for(const doc of state.documents){const details=element('details','document');details.append(element('summary','',`${doc.kind==='guide'?'Guide':'Changelog'} · ${doc.path}`),safeLink(doc.url,`Original document · ${doc.tag} ↗`),element('pre','',doc.text));list.append(details);}
 }
 
 function selectTab(tab,focus=false) {for(const name of ['changes','docs']) {const active=tab===name;$(`tab-${name}`).classList.toggle('selected',active);$(`tab-${name}`).setAttribute('aria-selected',String(active));$(`tab-${name}`).tabIndex=active?0:-1;$(`${name}-panel`).hidden=!active;if(active&&focus)$(`tab-${name}`).focus();}}
@@ -212,23 +212,23 @@ for(const name of ['changes','docs'])$(`tab-${name}`).addEventListener('click',(
 document.querySelector('.tabs').addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();selectTab(event.key==='Home'?'changes':event.key==='End'?'docs':$('tab-changes').getAttribute('aria-selected')==='true'?'docs':'changes',true);}});
 $('catalog-search').addEventListener('input',()=>{const query=$('catalog-search').value.toLowerCase();for(const card of $('catalog-grid').children)card.hidden=!card.dataset.search.includes(query);});
 $('export-select').addEventListener('change',()=>{exportReport($('export-select').value);$('export-select').value='';});
-$('share-button').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);toast('A riport linkjét kimásoltuk.');}catch{message(`A másolás nem engedélyezett. A riport megosztható linkje: ${location.href}`);}});
+$('share-button').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);toast('Report link copied.');}catch{message(`Copying is not allowed. Share this report link: ${location.href}`);}});
 $('theme-toggle').addEventListener('click',()=>{const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme(theme);try{localStorage.setItem('modulelens-theme',theme);}catch{/* Storage may be disabled. */}});
-function applyTheme(theme) {document.documentElement.dataset.theme=theme;$('theme-label').textContent=theme==='dark'?'Világos megjelenés':'Sötét megjelenés';}
+function applyTheme(theme) {document.documentElement.dataset.theme=theme;$('theme-label').textContent=theme==='dark'?'Light mode':'Dark mode';}
 try{applyTheme(localStorage.getItem('modulelens-theme')||'light');}catch{applyTheme('light');}
 
 async function boot() {
   try {
     const catalog=await fetchJSON('./data/catalog.json');
-    if(catalog.schema_version!==1||!Array.isArray(catalog.modules)||!catalog.modules.length)throw new Error('A modulkatalógus üres vagy nem támogatott formátumú.');
+    if(catalog.schema_version!==1||!Array.isArray(catalog.modules)||!catalog.modules.length)throw new Error('The module catalog is empty or uses an unsupported format.');
     state.catalog=catalog;fillCatalog();
-    $('catalog-state').textContent=`${catalog.modules.length} modul · ${dateLabel(catalog.generated_at)}`;
+    $('catalog-state').textContent=`${catalog.modules.length} modules · ${dateLabel(catalog.generated_at)}`;
     state.engine='opentofu';updateEngine();
     const id=params.get('module')||catalog.modules[0].id;
     await chooseModule(id,params.get('from'),params.get('to'),params.get('scope')||'.');
-    if(catalog.errors?.length)message('A katalógus frissítése nem minden modulnál sikerült. Az érintett modulok korábbi adatai szerepelhetnek.');
-  } catch(error) {$('catalog-state').textContent='Katalógus nem érhető el';message(`${error.message} Helyi futtatáshoz HTTP-kiszolgálót használj (npm run serve).`,true);}
-  try {const site=await fetchJSON('./site.json');if(site.repository_url){const link=safeLink(site.repository_url,'Forráskód a GitHubon ↗','source-link');link.id='project-link';$('project-link').replaceWith(link);}}
+    if(catalog.errors?.length)message('The catalog refresh failed for some modules. Older data may be shown for those modules.');
+  } catch(error) {$('catalog-state').textContent='Catalog unavailable';message(`${error.message} Use an HTTP server to run locally (npm run serve).`,true);}
+  try {const site=await fetchJSON('./site.json');if(site.repository_url){const link=safeLink(site.repository_url,'Source code on GitHub ↗','source-link');link.id='project-link';$('project-link').replaceWith(link);}}
   catch {/* Repository branding is optional for local use. */}
 }
 export const ready = boot();

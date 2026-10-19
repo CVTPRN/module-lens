@@ -1,82 +1,82 @@
 <!doctype html>
-<html lang="hu">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111c28">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <title>ModuleLens · Terraform modulok összehasonlítása</title>
+  <title>ModuleLens · Compare Terraform modules</title>
   <link rel="stylesheet" href="./registry-styles.css">
   <script type="module" src="./registry-app.js"></script>
 </head>
 <body>
   <div class="shell">
-    <aside class="sidebar" aria-label="Az alkalmazásról">
-      <a class="brand" href="./" aria-label="ModuleLens kezdőlap">
+    <aside class="sidebar" aria-label="About this application">
+      <a class="brand" href="./" aria-label="ModuleLens home">
         <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
         <span>module<span class="brand-accent">lens</span><small>Terraform intelligence</small></span>
       </a>
       <div class="side-content">
         <div class="side-kicker"><span class="live-dot"></span> REGISTRY EXPLORER</div>
-        <h2>A változás<br><em>részleteiben</em> van.</h2>
-        <p>Nézd meg, pontosan mi változott két Terraform modulverzió között.</p>
+        <h2>Change is in<br>the <em>details.</em></h2>
+        <p>See exactly what changed between two Terraform module versions.</p>
         <div class="side-rule"></div>
-        <div class="side-step"><span>01</span><div><strong>Válassz modult</strong><small>Publikus Terraform Registry</small></div></div>
-        <div class="side-step"><span>02</span><div><strong>Állítsd be a verziókat</strong><small>Almodulonként is működik</small></div></div>
-        <div class="side-step"><span>03</span><div><strong>Olvasd el a változásokat</strong><small>Inputok, outputok, jelzések</small></div></div>
+        <div class="side-step"><span>01</span><div><strong>Choose a module</strong><small>Public Terraform Registry</small></div></div>
+        <div class="side-step"><span>02</span><div><strong>Select your versions</strong><small>Compare submodules too</small></div></div>
+        <div class="side-step"><span>03</span><div><strong>Review the changes</strong><small>Inputs, outputs and guidance</small></div></div>
       </div>
-      <div class="side-foot"><span class="side-foot-icon">↗</span><span>Információ DevOps csapatoknak<br><small>Írásmentes összehasonlítás</small></span></div>
+      <div class="side-foot"><span class="side-foot-icon">↗</span><span>Insights for DevOps teams<br><small>Read-only comparison</small></span></div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <div class="crumb">WORKSPACE <span>/</span> MODULOK <span>/</span> ÖSSZEHASONLÍTÁS</div>
+        <div class="crumb">WORKSPACE <span>/</span> MODULES <span>/</span> COMPARISON</div>
         <a class="mode-link" href="./opentofu.html?engine=opentofu">OpenTofu →</a><div class="top-pill"><span class="top-pill-dot"></span> PUBLIC REGISTRY</div>
       </header>
 
       <div class="content">
-        <div class="page-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> MODULVERZIÓK</div>
-          <h1>Mi változott <span>a két verzió között?</span></h1>
-          <p>Válassz egy modult és két verziót. Megmutatjuk az új, eltávolított és módosult változókat és outputokat.</p>
+        <div class="page-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> MODULE VERSIONS</div>
+          <h1>What changed <span>between versions?</span></h1>
+          <p>Choose a module and two versions to see added, removed and changed inputs and outputs.</p>
         </div><div class="hero-decoration" aria-hidden="true"><div class="tile tile-a">v1<span>→</span></div><div class="tile tile-b">v2<span>↗</span></div></div></div>
 
         <section class="panel setup-panel" aria-labelledby="setup-title">
-          <div class="panel-header"><div class="section-num">01</div><div><h2 id="setup-title">Összehasonlítás beállítása</h2><p>Keress a Registryben, vagy adj meg egy pontos modulcímet.</p></div></div>
+          <div class="panel-header"><div class="section-num">01</div><div><h2 id="setup-title">Set up your comparison</h2><p>Search the Registry or enter an exact module address.</p></div></div>
           <div class="panel-body">
-            <label for="module-input" class="field-label">TERRAFORM MODUL <span class="required">*</span></label>
+            <label for="module-input" class="field-label">TERRAFORM MODULE <span class="required">*</span></label>
             <div class="search-wrap">
-              <div class="search-field"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="module-input" role="combobox" aria-autocomplete="list" type="search" placeholder="pl. terraform-google-modules/network/google" autocomplete="off" aria-controls="suggestions" aria-expanded="false" spellcheck="false"><kbd>↵</kbd></div>
+              <div class="search-field"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="module-input" role="combobox" aria-autocomplete="list" type="search" placeholder="e.g. terraform-google-modules/network/google" autocomplete="off" aria-controls="suggestions" aria-expanded="false" spellcheck="false"><kbd>↵</kbd></div>
               <div id="suggestions" class="suggestions" role="listbox" hidden></div>
             </div>
-            <div class="module-actions"><button class="text-button" id="load-module" type="button">Modul betöltése <span>↗</span></button><span class="hint">Formátum: névtér / név / provider</span></div>
+            <div class="module-actions"><button class="text-button" id="load-module" type="button">Load module <span>↗</span></button><span class="hint">Format: namespace / name / provider</span></div>
             <div id="hosting-note" class="hosting-note" role="status" hidden></div>
-            <div class="quick-picks"><span>GYORS VÁLASZTÁS</span><button class="quick-pick" data-module="terraform-google-modules/network/google" type="button">Google Network <span>↗</span></button><button class="quick-pick" data-module="terraform-google-modules/kubernetes-engine/google" type="button">Google Kubernetes Engine <span>↗</span></button><button class="quick-pick" data-module="terraform-aws-modules/vpc/aws" type="button">AWS VPC <span>↗</span></button></div>
+            <div class="quick-picks"><span>QUICK PICKS</span><button class="quick-pick" data-module="terraform-google-modules/network/google" type="button">Google Network <span>↗</span></button><button class="quick-pick" data-module="terraform-google-modules/kubernetes-engine/google" type="button">Google Kubernetes Engine <span>↗</span></button><button class="quick-pick" data-module="terraform-aws-modules/vpc/aws" type="button">AWS VPC <span>↗</span></button></div>
 
             <div class="divider"></div>
             <div class="select-grid">
-              <div class="field"><label class="field-label" for="from-version">JELENLEGI VERZIÓ <span class="required">*</span></label><div class="select-box"><select id="from-version" disabled><option value="">Előbb válassz modult</option></select></div></div>
+              <div class="field"><label class="field-label" for="from-version">CURRENT VERSION <span class="required">*</span></label><div class="select-box"><select id="from-version" disabled><option value="">Choose a module first</option></select></div></div>
               <div class="version-arrow" aria-hidden="true">→</div>
-              <div class="field"><label class="field-label" for="to-version">CÉLVERZIÓ <span class="required">*</span></label><div class="select-box"><select id="to-version" disabled><option value="">Előbb válassz modult</option></select></div></div>
+              <div class="field"><label class="field-label" for="to-version">TARGET VERSION <span class="required">*</span></label><div class="select-box"><select id="to-version" disabled><option value="">Choose a module first</option></select></div></div>
             </div>
-            <div class="submodule-row"><div><label class="field-label" for="submodule">ALMODUL</label><p>Ha a modul <code>//modules/…</code> útvonalát használod, itt válaszd ki.</p></div><div class="select-box"><select id="submodule" disabled><option value="">Gyökérmodul</option></select></div></div>
-            <div class="form-footer"><div id="status" class="status" role="status" aria-live="polite">Válassz egy modult a kezdéshez.</div><button id="compare" class="primary-button" type="button" disabled><span class="btn-symbol">⇄</span> Verziók összehasonlítása <span class="btn-arrow">↗</span></button></div>
+            <div class="submodule-row"><div><label class="field-label" for="submodule">SUBMODULE</label><p>If you use a <code>//modules/…</code> path, select it here.</p></div><div class="select-box"><select id="submodule" disabled><option value="">Root module</option></select></div></div>
+            <div class="form-footer"><div id="status" class="status" role="status" aria-live="polite">Choose a module to get started.</div><button id="compare" class="primary-button" type="button" disabled><span class="btn-symbol">⇄</span> Compare versions <span class="btn-arrow">↗</span></button></div>
           </div>
         </section>
 
         <section class="registry-catalog" aria-labelledby="catalog-title">
-          <div class="catalog-heading"><div><div class="eyebrow">TELJES NYILVÁNOS KATALÓGUS</div><h2 id="catalog-title">Modulok a Terraform Registryből</h2></div><label class="provider-filter">Provider<select id="provider-filter"><option value="">Összes provider</option><option value="aws">AWS</option><option value="azurerm">Azure</option><option value="google">Google Cloud</option><option value="kubernetes">Kubernetes</option><option value="helm">Helm</option></select></label></div>
-          <p id="catalog-status" class="catalog-status" aria-live="polite">Katalógus betöltése…</p><div id="registry-grid" class="registry-grid"></div><button id="load-more" type="button" class="outline-link" hidden>További modulok betöltése</button>
+          <div class="catalog-heading"><div><div class="eyebrow">FULL PUBLIC CATALOG</div><h2 id="catalog-title">Modules from the Terraform Registry</h2></div><label class="provider-filter">Provider<select id="provider-filter"><option value="">All providers</option><option value="aws">AWS</option><option value="azurerm">Azure</option><option value="google">Google Cloud</option><option value="kubernetes">Kubernetes</option><option value="helm">Helm</option></select></label></div>
+          <p id="catalog-status" class="catalog-status" aria-live="polite">Loading catalog…</p><div id="registry-grid" class="registry-grid"></div><button id="load-more" type="button" class="outline-link" hidden>Load more modules</button>
         </section>
         <section id="results" class="results" aria-labelledby="results-title" hidden>
-          <div class="results-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> ELEMZÉS</div><h2 id="results-title">Változások áttekintése</h2><p id="comparison-label" class="comparison-label"></p></div><a id="registry-link" class="outline-link" href="https://registry.terraform.io/" target="_blank" rel="noopener noreferrer">Megnyitás a Registryben <span>↗</span></a></div>
-          <div class="report-actions"><button id="share-report" type="button" class="outline-link">Link másolása</button><button id="export-json" type="button" class="outline-link">JSON export</button><button id="export-md" type="button" class="outline-link">Markdown export</button></div><div class="stats"><div class="stat"><span class="stat-icon stat-added">＋</span><strong id="added-count">0</strong><span>Új elem</span></div><div class="stat"><span class="stat-icon stat-removed">−</span><strong id="removed-count">0</strong><span>Eltávolított</span></div><div class="stat"><span class="stat-icon stat-changed">~</span><strong id="changed-count">0</strong><span>Módosult</span></div><div class="stat"><span class="stat-icon stat-review">?</span><strong id="hint-count">0</strong><span>Lehetséges átnevezés</span></div></div>
-          <div class="result-toolbar"><div class="filter-group" aria-label="Változások szűrése"><button type="button" class="filter active" data-filter="all" aria-pressed="true">Összes <span id="all-count">0</span></button><button type="button" class="filter" data-filter="inputs" aria-pressed="false">Változók</button><button type="button" class="filter" data-filter="outputs" aria-pressed="false">Outputok</button><button type="button" class="filter" data-filter="hint" aria-pressed="false">Lehetséges átnevezések</button></div></div>
+          <div class="results-head"><div><div class="eyebrow"><span class="eyebrow-line"></span> ANALYSIS</div><h2 id="results-title">Changes at a glance</h2><p id="comparison-label" class="comparison-label"></p></div><a id="registry-link" class="outline-link" href="https://registry.terraform.io/" target="_blank" rel="noopener noreferrer">View in Registry <span>↗</span></a></div>
+          <div class="report-actions"><button id="share-report" type="button" class="outline-link">Copy link</button><button id="export-json" type="button" class="outline-link">Export JSON</button><button id="export-md" type="button" class="outline-link">Export Markdown</button></div><div class="stats"><div class="stat"><span class="stat-icon stat-added">＋</span><strong id="added-count">0</strong><span>Added</span></div><div class="stat"><span class="stat-icon stat-removed">−</span><strong id="removed-count">0</strong><span>Removed</span></div><div class="stat"><span class="stat-icon stat-changed">~</span><strong id="changed-count">0</strong><span>Changed</span></div><div class="stat"><span class="stat-icon stat-review">?</span><strong id="hint-count">0</strong><span>Possible rename</span></div></div>
+          <div class="result-toolbar"><div class="filter-group" aria-label="Filter changes"><button type="button" class="filter active" data-filter="all" aria-pressed="true">All <span id="all-count">0</span></button><button type="button" class="filter" data-filter="inputs" aria-pressed="false">Inputs</button><button type="button" class="filter" data-filter="outputs" aria-pressed="false">Outputs</button><button type="button" class="filter" data-filter="hint" aria-pressed="false">Possible renames</button></div></div>
           <p id="report-provenance" class="catalog-status"></p><div id="change-list" class="change-list"></div>
-          <div id="empty-result" class="empty-result" hidden><div class="empty-graphic" aria-hidden="true">✓</div><h3>Nem találtunk változást ebben a nézetben.</h3><p>A Registryben közzétett inputok és outputok alapján nincs megjeleníthető eltérés.</p></div>
-          <div class="scope-note"><span class="scope-icon">i</span><div><strong>Mit jelent ez az eredmény?</strong><p id="scope-text"></p><p>Az átnevezésre vonatkozó jelzés csak javaslat. Az infrastruktúrára gyakorolt hatást az adott környezetben készített Terraform plan mutatja meg.</p></div></div>
+          <div id="empty-result" class="empty-result" hidden><div class="empty-graphic" aria-hidden="true">✓</div><h3>No changes found in this view.</h3><p>No differences to display in the published Registry inputs and outputs.</p></div>
+          <div class="scope-note"><span class="scope-icon">i</span><div><strong>What does this result mean?</strong><p id="scope-text"></p><p>Rename hints are suggestions only. Run Terraform plan in your own environment to assess the infrastructure impact.</p></div></div>
         </section>
-        <footer class="main-foot"><a href="https://github.com/CVTPRN/module-lens" target="_blank" rel="noopener noreferrer">FORRÁSKÓD</a> <span>·</span> MODULELENS <span>·</span> TERRAFORM REGISTRY EXPLORER <span>·</span> READ-ONLY</footer>
+        <footer class="main-foot"><a href="https://github.com/CVTPRN/module-lens" target="_blank" rel="noopener noreferrer">SOURCE CODE</a> <span>·</span> MODULELENS <span>·</span> TERRAFORM REGISTRY EXPLORER <span>·</span> READ-ONLY</footer>
       </div>
     </main>
   </div>

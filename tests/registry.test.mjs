@@ -30,25 +30,25 @@ test('Registry required flag is authoritative; ambiguous default strings do not 
 });
 test('removed inputs and outputs include caller-specific conditions and actions',()=>{
   const r=compare({inputs:[{name:'old',required:false}],outputs:[{name:'removed'}]},{});
-  assert.match(r.changes.find(c=>c.name==='old').condition,/Ha átadod/);assert.match(r.changes.find(c=>c.name==='removed').condition,/Ha hivatkozol/);
+  assert.match(r.changes.find(c=>c.name==='old').condition,/If you pass/);assert.match(r.changes.find(c=>c.name==='removed').condition,/If you reference/);
   assert.ok(r.changes.every(c=>c.sources.every(s=>s.startsWith('https://registry.terraform.io/'))));
 });
 test('newly available metadata is reported as review rather than a certain breaking code change',()=>{
   const r=compare({inputs:[{name:'x',default:'null'}]},{inputs:[{name:'x',default:'null',type:'string'}]});
-  assert.equal(r.changes[0].level,'review');assert.match(r.changes[0].action,/nem bizonyít/);
+  assert.equal(r.changes[0].level,'review');assert.match(r.changes[0].action,/does not prove/);
 });
 test('default, type and required changes are detected',()=>{
   const r=compare({inputs:[{name:'x',type:'any',default:'null',required:false}]},{inputs:[{name:'x',type:'string',default:'"new"',required:true}]});
-  assert.match(r.changes[0].note,/típus/);assert.match(r.changes[0].note,/alapérték/);assert.match(r.changes[0].note,/kötelező/);
+  assert.match(r.changes[0].note,/type/);assert.match(r.changes[0].note,/default/);assert.match(r.changes[0].note,/required/);
 });
 test('provider requirements and resource inventories appear without claiming a plan',()=>{
   const r=compare({provider_dependencies:[{name:'aws',version:'>=4'}],resources:[{type:'aws_vpc',name:'old'}]},{provider_dependencies:[{name:'aws',version:'>=5'}],resources:[{type:'aws_vpc',name:'new'}]});
-  assert.ok(r.changes.some(c=>c.category==='dependencies'));assert.match(r.changes.find(c=>c.category==='resources').note,/nem Terraform plan/);
+  assert.ok(r.changes.some(c=>c.category==='dependencies'));assert.match(r.changes.find(c=>c.category==='resources').note,/not a Terraform plan/);
 });
 test('potential rename remains a hint and does not suppress separate addition or removal',()=>{
   const description='The human readable name of this particular network infrastructure resource.';
   const r=compare({inputs:[{name:'cluster_name',description,required:false}]},{inputs:[{name:'name',description,required:false}]});
-  assert.equal(r.summary.hints,1);assert.equal(r.summary.added,1);assert.equal(r.summary.removed,1);assert.match(r.changes.find(c=>c.kind==='hint').note,/nem dokumentált/);
+  assert.equal(r.summary.hints,1);assert.equal(r.summary.added,1);assert.equal(r.summary.removed,1);assert.match(r.changes.find(c=>c.kind==='hint').note,/not a documented/);
 });
 test('submodule removal is detected, and unrelated module or missing versions are rejected',()=>{
   const a=data('1.0.0'),b=data('2.0.0');a.submodules=[{path:'modules/child',inputs:[],outputs:[]}];
@@ -57,7 +57,7 @@ test('submodule removal is detected, and unrelated module or missing versions ar
 });
 test('Markdown includes actionable conditions, Registry evidence and scope limitation',()=>{
   const report=compare({inputs:[{name:'old'}]},{}),md=registryMarkdown(report);
-  assert.match(md,/Mikor érint/);assert.match(md,/Teendő/);assert.match(md,/registry.terraform.io/);assert.match(md,/nem kompatibilitási garancia/);
+  assert.match(md,/When (?:this applies|does this affect you)/);assert.match(md,/Action/);assert.match(md,/registry.terraform.io/);assert.match(md,/not a guarantee of compatibility/);
 });
 test('real EC2 module, outside the initial catalog, compares published 5.0.0 and 6.0.0 data',()=>{
   const get=name=>JSON.parse(readFileSync(new URL(`fixtures/registry/${name}.json`,import.meta.url),'utf8'));

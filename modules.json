@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "modules": [
-    {"id":"aws-eks","name":"EKS","namespace":"terraform-aws-modules","registry_name":"eks","provider":"aws","repository":"terraform-aws-modules/terraform-aws-eks","description":"Amazon EKS klaszterek és node groupok","anchors":["v20.37.1","v21.0.0"]},
-    {"id":"aws-vpc","name":"VPC","namespace":"terraform-aws-modules","registry_name":"vpc","provider":"aws","repository":"terraform-aws-modules/terraform-aws-vpc","description":"AWS hálózatok, subnetek és átjárók","anchors":["v5.21.0","v6.0.0"]},
-    {"id":"aws-s3","name":"S3 Bucket","namespace":"terraform-aws-modules","registry_name":"s3-bucket","provider":"aws","repository":"terraform-aws-modules/terraform-aws-s3-bucket","description":"S3 tárolók és hozzáférési beállítások","anchors":["v4.11.0","v5.0.0"]},
-    {"id":"gcp-network","name":"Cloud Network","namespace":"terraform-google-modules","registry_name":"network","provider":"google","repository":"terraform-google-modules/terraform-google-network","description":"Google Cloud VPC és megosztott hálózatok","anchors":[]},
+    {"id":"aws-eks","name":"EKS","namespace":"terraform-aws-modules","registry_name":"eks","provider":"aws","repository":"terraform-aws-modules/terraform-aws-eks","description":"Amazon EKS clusters and node groups","anchors":["v20.37.1","v21.0.0"]},
+    {"id":"aws-vpc","name":"VPC","namespace":"terraform-aws-modules","registry_name":"vpc","provider":"aws","repository":"terraform-aws-modules/terraform-aws-vpc","description":"AWS networks, subnets and gateways","anchors":["v5.21.0","v6.0.0"]},
+    {"id":"aws-s3","name":"S3 Bucket","namespace":"terraform-aws-modules","registry_name":"s3-bucket","provider":"aws","repository":"terraform-aws-modules/terraform-aws-s3-bucket","description":"S3 buckets and access configuration","anchors":["v4.11.0","v5.0.0"]},
+    {"id":"gcp-network","name":"Cloud Network","namespace":"terraform-google-modules","registry_name":"network","provider":"google","repository":"terraform-google-modules/terraform-google-network","description":"Google Cloud VPC and shared networks","anchors":[]},
     {"id":"gcp-gke","name":"Kubernetes Engine","namespace":"terraform-google-modules","registry_name":"kubernetes-engine","provider":"google","repository":"terraform-google-modules/terraform-google-kubernetes-engine","description":"Google Kubernetes Engine klaszterek","anchors":[]}
   ]
 }

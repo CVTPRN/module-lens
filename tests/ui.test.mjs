@@ -36,7 +36,7 @@ test('complete page flow: boot, real report, filtering, docs, engine, catalog, i
   $('finding-search').value='cluster_name';$('finding-search').dispatchEvent(new window.Event('input'));
   assert.match($('findings-list').textContent,/cluster_name → name/);
   $('finding-search').value='absolutely-no-such-variable';$('finding-search').dispatchEvent(new window.Event('input'));
-  assert.match($('findings-list').textContent,/Nincs a szűrésnek/);
+  assert.match($('findings-list').textContent,/No changes match/);
   $('finding-search').value='';$('finding-search').dispatchEvent(new window.Event('input'));
   $('level-filter').value='info';$('level-filter').dispatchEvent(new window.Event('change'));
   assert.ok([...$('findings-list').querySelectorAll('.finding')].every(el=>el.classList.contains('info')));
@@ -54,7 +54,7 @@ test('complete page flow: boot, real report, filtering, docs, engine, catalog, i
   $('nav-compare').click();assert.equal($('compare-view').hidden,false);
   $('to-select').value=$('from-select').value;$('to-select').dispatchEvent(new window.Event('change'));
   await wait(()=>!$('compare-button').disabled);$('compare-button').click();await wait(()=>!$('message').hidden);
-  assert.match($('message').textContent,/újabb/);assert.equal($('results').hidden,true);
+  assert.match($('message').textContent,/newer/);assert.equal($('results').hidden,true);
   for(const a of window.document.querySelectorAll('a[target="_blank"]'))assert.ok(a.rel.includes('noopener'));
   await wait(()=>$('toast').hidden); // Verify the clipboard notification expires before tearing down the DOM.
   dom.window.close();

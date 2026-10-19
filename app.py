@@ -47,7 +47,7 @@ def upstream_url(operation, params):
     if operation == "search":
         q, provider, offset, limit = one("q").strip(), one("provider"), one("offset", "0"), one("limit", "24")
         if len(q) > 100 or re.search(r"[\x00-\x1f]", q) or (provider and not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", provider)) or not re.fullmatch(r"\d{1,7}", offset) or not limit.isdecimal() or not 1 <= int(limit) <= 50:
-            raise ApiError("Érvénytelen keresési paraméter.")
+            raise ApiError("Invalid search parameter.")
         query = {"offset": str(int(offset)), "limit": str(int(limit))}
         if q:
             query["q"] = q
@@ -56,15 +56,15 @@ def upstream_url(operation, params):
         return REGISTRY + ("/search" if q else "") + "?" + urllib.parse.urlencode(query)
     module = one("module")
     if not ADDRESS_RE.fullmatch(module):
-        raise ApiError("Érvénytelen modulcím.")
+        raise ApiError("Invalid module address.")
     if operation == "versions":
         return f"{REGISTRY}/{module}/versions"
     if operation == "module":
         version = one("version")
         if not VERSION_RE.fullmatch(version):
-            raise ApiError("Érvénytelen verzió.")
+            raise ApiError("Invalid version.")
         return f"{REGISTRY}/{module}/{urllib.parse.quote(version, safe='')}"
-    raise ApiError("Ismeretlen Registry API-művelet.")
+    raise ApiError("Unknown Registry API operation.")
 
 
 def registry_json_bytes(url):
@@ -78,18 +78,18 @@ def registry_json_bytes(url):
         with urllib.request.build_opener(NoRedirect()).open(request, timeout=20) as response:
             payload = response.read(MAX_RESPONSE + 1)
         if len(payload) > MAX_RESPONSE:
-            raise ApiError("A Registry válasza túl nagy.", 502)
+            raise ApiError("The Registry response is too large.", 502)
         data = json.loads(payload)
         if not isinstance(data, dict):
             raise ValueError("Invalid root")
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
-            raise ApiError("A modul vagy verzió nem található a Terraform Registryben.", 404) from None
+            raise ApiError("The module or version was not found in the Terraform Registry.", 404) from None
         if exc.code == 429:
-            raise ApiError("A Registry lekérési korlátját elértük. Próbáld újra később.", 503) from None
-        raise ApiError(f"A Registry nem érhető el (HTTP {exc.code}).", 502) from None
+            raise ApiError("Registry rate limit reached. Please try again later.", 503) from None
+        raise ApiError(f"The Registry is unavailable (HTTP {exc.code}).", 502) from None
     except (urllib.error.URLError, TimeoutError, ValueError):
-        raise ApiError("A Registry nem érhető el, időtúllépés történt vagy hibás választ adott.", 502) from None
+        raise ApiError("The Registry is unavailable, timed out or returned an invalid response.", 502) from None
     with lock:
         cache.pop(url, None)
         while cache and (len(cache) >= 64 or sum(len(v[1]) for v in cache.values()) + len(payload) > MAX_CACHE):
@@ -114,7 +114,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if url.path.startswith("/api/registry/"):
                 if not re.fullmatch(r"/api/registry/(health|search|versions|module)", url.path):
-                    raise ApiError("Nem található API-művelet.", 404)
+                    raise ApiError("API operation not found.", 404)
                 params = urllib.parse.parse_qs(url.query, keep_blank_values=True)
                 target = upstream_url(url.path.rsplit("/", 1)[-1], params)
                 body = registry_json_bytes(target) if target else json.dumps({"ok": True, "service": "ModuleLens Registry proxy", "registry": REGISTRY}).encode()
@@ -122,10 +122,10 @@ class Handler(BaseHTTPRequestHandler):
                 return
             path = urllib.parse.unquote(url.path)
             if "\x00" in path or any(part.startswith(".") for part in path.split("/") if part):
-                raise ApiError("Nem található.", 404)
+                raise ApiError("Not found.", 404)
             file = (WEB / (path.lstrip("/") or "index.html")).resolve()
             if not file.is_relative_to(WEB.resolve()) or not file.is_file():
-                raise ApiError("Nem található.", 404)
+                raise ApiError("Not found.", 404)
             mime = "application/gzip" if file.name.endswith(".gz") else mimetypes.guess_type(file.name)[0] or "application/octet-stream"
             if mime in ("text/javascript", "application/javascript"):
                 mime = "text/javascript; charset=utf-8"
@@ -140,7 +140,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ModuleLens: élő Terraform Registry és OpenTofu összehasonlítás")
+    parser = argparse.ArgumentParser(description="ModuleLens: live Terraform Registry and OpenTofu comparisons")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()

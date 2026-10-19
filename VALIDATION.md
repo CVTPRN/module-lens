@@ -1,23 +1,30 @@
-# Ellenőrzési eredmény — 2026-10-19
+# Verification results — 2026-10-19
 
-- Python: 20 sikeres teszt; beleértve a tényleges HTTP-kiszolgálást és a Registry-útvonalak védelmét.
-- JavaScript/DOM/Node: 46 sikeres teszt; a korábbi HCL-elemző mellett a teljes Registry-folyamat, lapozás, providerfilter, teljes verziólista, SemVer, hibakezelés, elavult válaszok, a standalone Node HTTP-kiszolgáló és a statikus tárhelyre figyelmeztető nézet.
-- Az eredeti ötmodulos listától független, valódi Registry-adatokat használtunk a `terraform-aws-modules/ec2-instance/aws` 5.0.0 és 6.0.0 verzióihoz. A tesztfixture-ök a Registryből származnak.
-- A teljes Registry-listázás élő lekérése 24 találatot és következő lapozási offsetet adott. Az Azure virtualnetwork keresés valós Azure-modulokat adott vissza.
-- A verziókezelés 1200 elemű listával is tesztelt; nincs a korábbi indexelt listára korlátozva.
-- A statikus build a meglévő 102 OpenTofu/Terraform-pillanatkép integritását is ellenőrzi.
-- A GitHub Pages-build a `GITHUB_REPOSITORY` környezeti változó mellett is megőrzi a működő szerveres alkalmazás linkjét a `site.json` fájlban.
-- A privát szerveres webes változat natív publikálása sikeres.
-- A hosztolt változaton a kezdőlap, az API-állapot, az Azure-modulkeresés, az EC2-modul teljes verziólistája és a 6.0.0-s verzió metaadatai is HTTP 200 választ adtak. Az EC2-verziólista 99 kiadást tartalmazott.
+## Application checks
 
-## Korlátok
+- Python: 20 tests cover source parsing, real HTTP serving and Registry route protection.
+- JavaScript/DOM/Node: 46 tests cover HCL comparisons, the live Registry workflow, pagination, provider filtering, complete version lists, semantic versions, error handling, stale responses, the standalone Node server and static-hosting fallback.
+- English UI labels, comparison conditions, actions and Markdown report expectations are exercised by the existing comparison and DOM tests.
+- Registry fixtures use real `terraform-aws-modules/ec2-instance/aws` metadata for versions 5.0.0 and 6.0.0, independently of the curated catalog.
+- Version handling is tested with 1,200 entries and is not restricted to locally indexed versions.
+- The static build validates all 102 bundled Terraform/OpenTofu snapshots.
+- GitHub Pages builds preserve the hosted application link in `site.json` when `GITHUB_REPOSITORY` is set.
+- Bundled module descriptions and parser warnings are in English. Upstream source declarations, license texts, identifiers and evidence URLs are preserved.
 
-- Vizuális böngészőellenőrzés nem volt elérhető. A DOM-tesztek a működést ellenőrzik, a megjelenést nem tanúsítják.
-- A teljes Registry-keresés szerveroldali API-t igényel. A GitHub Pages nézet külön jelzi az API hiányát és a működő hosztolt alkalmazáshoz vezet.
-- A Terraform Registry-nézet közzétett metaadatokat hasonlít össze; nem vizsgálja a felhasználó kódját, state-jét, outputkifejezéseit vagy az átugrott kiadások teljes migrációs történetét.
-- A korábbi OpenTofu-nézetben a Google Network v18.2.0, v18.3.0 és v18.3.1 `modules/foundation/network` almoduljának két fájlját a rögzített HCL-parser nem tudja teljesen feldolgozni; ezt a riport hiányos elemzésként jelzi.
+## Hosting checks
 
-Újrafuttatás:
+The initial public Render deployment returned HTTP 200 for the home page, health endpoint, Azure module search, EC2 version list and EC2 6.0.0 metadata. The EC2 version list contained 99 releases at verification time.
+
+Render automatic deployment is configured, but the subsequent documentation commit did not start a deployment. Do not assume a push has reached production: check the deployed commit and explicitly deploy the latest version when required.
+
+## Limitations
+
+- No visual browser inspection was performed. DOM tests verify behavior, not rendered appearance.
+- Full Registry search requires a server-side API. The Pages view explains API unavailability and links to the hosted application.
+- Registry comparisons use published metadata; they do not inspect user configuration, state, output expressions or the complete migration history of skipped releases.
+- In the OpenTofu snapshot view, the pinned HCL parser cannot fully process two files in the Google Network `modules/foundation/network` submodule for v18.2.0, v18.3.0 and v18.3.1. Reports mark this analysis as incomplete.
+
+## Reproduce
 
 ```bash
 python -m pip install -r requirements.txt

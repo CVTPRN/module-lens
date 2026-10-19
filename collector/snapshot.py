@@ -78,17 +78,17 @@ def make_snapshot(files, repository, tag, sha, engine):
         url = source_url(repository, sha, path)
         scope["files"].append({"path": path, "url": url, "sha256": hashlib.sha256(text.encode()).hexdigest()})
         if re.search(r"(?:^|/)(?:override|\w+_override)\.(?:tf|tofu)(?:\.json)?$", path):
-            scope["warnings"].append({"file": path, "message": "Override fájl: az összeolvasztási szemantika nincs kiértékelve.", "source": url})
+            scope["warnings"].append({"file": path, "message": "Override file: merge semantics are not evaluated.", "source": url})
         try:
             data = json.loads(text) if path.endswith(".json") else hcl2.loads(text)
         except Exception as exc:
-            scope["warnings"].append({"file": path, "message": f"Nem feldolgozható HCL/JSON ({type(exc).__name__}).", "source": url})
+            scope["warnings"].append({"file": path, "message": f"Unable to parse HCL/JSON ({type(exc).__name__}).", "source": url})
             continue
         for kind, dest in (("variable", "inputs"), ("output", "outputs")):
             for group in blocks(data.get(kind)):
                 for name, attributes in group.items():
                     if name in scope[dest]:
-                        scope["warnings"].append({"file": path, "message": f"Többszörös deklaráció: {kind} {name}.", "source": url})
+                        scope["warnings"].append({"file": path, "message": f"Duplicate declaration: {kind} {name}.", "source": url})
                     scope[dest][name] = {**attributes, "_source": url, "_file": path}
         for settings in blocks(data.get("terraform")) + blocks(data.get("tofu")):
             if "required_version" in settings:
