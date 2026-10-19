@@ -51,7 +51,10 @@ def main():
     if repo:
         if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo):
             raise ValueError("Invalid GITHUB_REPOSITORY")
-        (output / "site.json").write_text(json.dumps({"repository_url": f"https://github.com/{repo}"}))
+        site_path = output / "site.json"
+        site = json.loads(site_path.read_text()) if site_path.exists() else {}
+        site["repository_url"] = f"https://github.com/{repo}"
+        site_path.write_text(json.dumps(site, ensure_ascii=False))
     shutil.copy2(ROOT / "THIRD_PARTY_NOTICES.md", output / "THIRD_PARTY_NOTICES.md")
     shutil.copy2(ROOT / "LICENSE", output / "LICENSE")
     print(f"Validated {count} snapshots; static site ready in {output}")

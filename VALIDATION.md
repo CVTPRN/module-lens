@@ -6,6 +6,7 @@
 - A teljes Registry-listázás élő lekérése 24 találatot és következő lapozási offsetet adott. Az Azure virtualnetwork keresés valós Azure-modulokat adott vissza.
 - A verziókezelés 1200 elemű listával is tesztelt; nincs a korábbi indexelt listára korlátozva.
 - A statikus build a meglévő 102 OpenTofu/Terraform-pillanatkép integritását is ellenőrzi.
+- A GitHub Pages-build a `GITHUB_REPOSITORY` környezeti változó mellett is megőrzi a működő szerveres alkalmazás linkjét a `site.json` fájlban.
 - A privát szerveres webes változat natív publikálása sikeres.
 - A hosztolt változaton a kezdőlap, az API-állapot, az Azure-modulkeresés, az EC2-modul teljes verziólistája és a 6.0.0-s verzió metaadatai is HTTP 200 választ adtak. Az EC2-verziólista 99 kiadást tartalmazott.
 
