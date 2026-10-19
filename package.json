@@ -1,0 +1,17 @@
+{
+  "name": "module-lens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "python scripts/build.py",
+    "serve": "python -m http.server 8080 --directory web"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}
