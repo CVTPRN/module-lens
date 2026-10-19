@@ -67,6 +67,20 @@ node server/node-server.js
 
 A `PORT` és `HOST` környezeti változókkal konfigurálható.
 
+### Render Free telepítés
+
+A gyökérkönyvtár `render.yaml` fájlja a teljes alkalmazás telepítését írja le:
+
+- Egyetlen **Free web service**, Frankfurt régióban, a meglévő Dockerfile használatával.
+- A felület és az élő Registry API ugyanazon a címen működik.
+- A `main` ág minden új commitja után automatikus újratelepítés (`autoDeployTrigger: commit`). A GitHub CI külön ellenőrzi a változtatásokat.
+- Az alkalmazás állapota a `/api/registry/health` útvonalon ellenőrizhető; alkalmazásport: `8080`.
+- Nem hoz létre adatbázist, lemezt vagy fizetős szolgáltatást.
+
+A konfiguráció a Render-integráción keresztüli beállításhoz vagy Render Blueprintként használható. Az első létrehozáskor a Rendernek hozzáférést kell adni ehhez a GitHub-repóhoz, hogy az automatikus telepítések működjenek. A YAML feltöltése önmagában még nem hoz létre futó Render-szolgáltatást.
+
+Az ingyenes szolgáltatás 15 perc inaktivitás után leáll; a következő kérés újraindítja, ami körülbelül egy percig tarthat. A Free keretek és a sávszélesség/build korlátai a [Render dokumentációjában](https://render.com/docs/free) találhatók.
+
 ## API
 
 Mindkét kiszolgáló ugyanazt a korlátozott, csak olvasásra alkalmas API-t biztosítja:

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+  - type: web
+    name: module-lens
+    runtime: docker
+    plan: free
+    region: frankfurt
+    repo: https://github.com/CVTPRN/module-lens
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: "8080"
