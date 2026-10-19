@@ -4,7 +4,7 @@ Terraform-modulok keresése a **teljes nyilvános Terraform Registryben**, minde
 
 Az új kereső a felhasználó által megadott `app.py`, `app.js`, `index.html` és `styles.css` prototípusra épül. A korábbi OpenTofu-elemző külön nézetben megmaradt.
 
-[Működő webes változat (privát hozzáférés)](https://module-lens-registry.azurebeech10.chatgpt.site)
+[Nyilvános webes alkalmazás](https://module-lens.onrender.com)
 
 ## Terraform Registry: élő működés
 
@@ -57,7 +57,7 @@ Támogatott futtatási módok:
 | Szerveres webes hosztolás | Igen | Igen |
 | GitHub Pages / statikus tárhely | Külön szerveres alkalmazás szükséges | Igen |
 
-A privát hosztolt változat teljes weboldalt és szerveroldali API-t tartalmaz. A hozzáférést a hosztolási platform kezeli; a privát működést a publikus Registry-adatok nem változtatják nyilvánossá. A publikussá tétel külön hozzáférés-beállítás.
+A nyilvános Render-változat teljes weboldalt és szerveroldali API-t tartalmaz. A korábbi privát előnézet hozzáférési beállításai ettől függetlenek.
 
 Node.js 22+ környezetben csomagtelepítés nélkül is indítható:
 
@@ -77,7 +77,7 @@ A gyökérkönyvtár `render.yaml` fájlja a teljes alkalmazás telepítését �
 - Az alkalmazás állapota a `/api/registry/health` útvonalon ellenőrizhető; alkalmazásport: `8080`.
 - Nem hoz létre adatbázist, lemezt vagy fizetős szolgáltatást.
 
-A konfiguráció a Render-integráción keresztüli beállításhoz vagy Render Blueprintként használható. Az első létrehozáskor a Rendernek hozzáférést kell adni ehhez a GitHub-repóhoz, hogy az automatikus telepítések működjenek. A YAML feltöltése önmagában még nem hoz létre futó Render-szolgáltatást.
+Az éles szolgáltatás a **My Workspace** munkaterületen, a Render-integráción keresztül jött létre. [Render kezelőfelület](https://dashboard.render.com/web/srv-dbb0l6cs728c739vo49g). A `render.yaml` az ismételhető telepítési konfiguráció; az éles szolgáltatás nincs Blueprinthez kapcsolva, így a YAML módosításai önmagukban nem írják át a Render beállításait.
 
 Az ingyenes szolgáltatás 15 perc inaktivitás után leáll; a következő kérés újraindítja, ami körülbelül egy percig tarthat. A Free keretek és a sávszélesség/build korlátai a [Render dokumentációjában](https://render.com/docs/free) találhatók.
 
